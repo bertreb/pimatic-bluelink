@@ -58,7 +58,7 @@ module.exports = (env) ->
                 config =
                   id: (carConfig.nickname).split(' ').join("_")
                   name: carConfig.nickname
-                  class: "BluelinkDevice"
+                  class: "KiaDevice"
                   vin: carConfig.vin
                   vehicleId: carConfig.id
                   type: carConfig.name
