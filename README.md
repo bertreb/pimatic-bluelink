@@ -53,7 +53,9 @@ The action syntax:
   bluelink <KiaDevice Id> [start $startOptionsVariable | startDefault | stop |
       lock | unlock | chargeStart | chargeStop ]
 ```
-The $startOptionsVariable syntax is a string with the following format
+The $startOptionsVariable syntax is a string variable with the following format:
+```
 [defrost:[true|false]] | [windscreenHeating:[true|false] | [temperature:number]
+```
 You can change by name the default settings, for 1, 2 or all 3 options.
 Use 'startDefault' is you want to remote start the airco with the device defaults
