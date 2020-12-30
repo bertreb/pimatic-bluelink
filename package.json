@@ -1,0 +1,42 @@
+{
+  "name": "pimatic-bluelink",
+  "description": "Pimatic plugin for Bluelink connected cars",
+  "author": {
+    "name": "Bert Gierveld",
+    "email": "gitbertreb@gmail.com",
+    "url": "https://github.com/bertreb"
+  },
+  "main": "pimatic-bluelink",
+  "files": [
+    "pimatic-bluelink.coffee",
+    "pimatic-bluelink-config-schema.coffee",
+    "device-config-schema.coffee",
+    "README.md",
+    "LICENSE",
+    "HISTORY.md"
+  ],
+  "homepage": "https://github.com/bertreb/pimatic-bluelink.git",
+  "keywords": [
+    "pimatic",
+    "vacuum",
+    "cleaner",
+    "ecovacs"
+  ],
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bertreb/pimatic-bluelink.git"
+  },
+  "configSchema": "pimatic-bluelink-config-schema.coffee",
+  "dependencies": {
+    "kuvork": "^5.4.4",
+    "lodash": "^4.17.15"
+  },
+  "peerDependencies": {
+    "pimatic": "0.9.*"
+  },
+  "engines": {
+    "node": ">=4",
+    "npm": ">=2"
+  }
+}
