@@ -194,21 +194,22 @@ module.exports = (env) ->
         windscreenHeating: false
         temperature: 20
         unit: 'C'
-      try
-        parameters = _options.split(",")
-        for parameter in parameters
-          tokens = parameter.split(":")
-          _key = tokens[0].trim()
-          _val = tokens[1].trim()
-          switch _key
-            when "defrost"
-              climateOptions.defrost = Boolean _val
-            when "windscreenHeating"
-              climateOptions.windscreenHeating = Boolean _val
-            when "temperature"
-              climateOptions.temperature = Number _val
-      catch err
-        env.logger.debug "Handled error in parseOptions " + err
+      if _options?
+        try
+          parameters = _options.split(",")
+          for parameter in parameters
+            tokens = parameter.split(":")
+            _key = tokens[0].trim()
+            _val = tokens[1].trim()
+            switch _key
+              when "defrost"
+                climateOptions.defrost = Boolean _val
+              when "windscreenHeating"
+                climateOptions.windscreenHeating = Boolean _val
+              when "temperature"
+                climateOptions.temperature = Number _val
+        catch err
+          env.logger.debug "Handled error in parseOptions " + err
 
       return climateOptions
 
@@ -219,7 +220,6 @@ module.exports = (env) ->
         switch command
           when "start"
             env.logger.debug "Start with options: " + JSON.stringify(@parseOptions(options),null,2)
-            ###
             @vehicle.start(@parseOptions(options))
             .then (resp)=>
               env.logger.debug "Started: " + JSON.stringify(resp,null,2)
@@ -228,7 +228,6 @@ module.exports = (env) ->
             .catch (err) =>
               env.logger.debug "Error start car: " + JSON.stringify(err,null,2)
               reject()
-            ###
           when "stop"
             @vehicle.stop()
             .then (resp)=>
