@@ -51,7 +51,7 @@ The car can be controlled via rules
 The action syntax:
 ```
   bluelink <KiaDevice Id> [start $startOptionsVariable | startDefault | stop |
-  lock | unlock | chargeStart | chargeStop ]
+      lock | unlock | chargeStart | chargeStop ]
 ```
 The $startOptionsVariable syntax is a string with the following format
 [defrost:[true|false]] | [windscreenHeating:[true|false] | [temperature:number]
