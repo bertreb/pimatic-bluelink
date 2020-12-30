@@ -18,7 +18,7 @@ module.exports = (env) ->
       @pin = @config.pin
 
       @clientReady = false
-      @pollTime = @config.pollTime ? 120000
+      @pollTime = @config.pollTime ? 300000 # 5 minutes
 
       @framework.variableManager.waitForInit()
       .then ()=>
@@ -213,7 +213,6 @@ module.exports = (env) ->
 
       return climateOptions
 
-
     execute: (command, options) =>
       return new Promise((resolve,reject) =>
 
@@ -240,7 +239,7 @@ module.exports = (env) ->
           when "lock"
             @vehicle.lock()
             .then (resp)=>
-              @setLock(true)
+              @setDoor(true)
               env.logger.debug "Locked: " + JSON.stringify(resp,null,2)
               resolve()
             .catch (err) =>
@@ -249,7 +248,7 @@ module.exports = (env) ->
           when "unlock"
             @vehicle.unlock()
             .then (resp)=>
-              @setLock(false)
+              @setDoor(false)
               env.logger.debug "Unlocked: " + JSON.stringify(resp,null,2)
               resolve()
             .catch (err) =>
@@ -291,11 +290,11 @@ module.exports = (env) ->
 
     setEngine: (_status) =>
       @_engine = Boolean _status
-      @emit 'engine', _status
+      @emit 'engine', @_engine
 
     setDoor: (_status) =>
       @_door = Boolean _status
-      @emit 'door', _status
+      @emit 'door', @_door
 
     setEvStatus: (evStatus) =>
       @_battery = Number evStatus.batteryStatus
@@ -310,17 +309,17 @@ module.exports = (env) ->
 
     setAirco: (_status) =>
       @_airco = Boolean _status
-      @emit 'airco', _status
+      @emit 'airco', @_airco
 
     setOdo: (_status) =>
       @_odo = Number _status
-      @emit 'odo', _status
+      @emit 'odo', @_odo
 
     setLocation: (_lat, _lon) =>
       @_lat = _lat
       @_lon = _lon
-      @emit 'lat', _lat
-      @emit 'lon', _lon
+      @emit 'lat', @_lat
+      @emit 'lon', @_lon
 
     setCharge: (charge) =>
       @_charging = Boolean charge
