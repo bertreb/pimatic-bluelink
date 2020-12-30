@@ -76,6 +76,11 @@ module.exports = (env) ->
         type: "boolean"
         acronym: "engine"
         labels: ["on","off"]
+      airco:
+        description: "Status of airco"
+        type: "boolean"
+        acronym: "airco"
+        labels: ["on","off"]
       door:
         description: "Status of doorlock"
         type: "boolean"
@@ -85,6 +90,11 @@ module.exports = (env) ->
         description: "If vehicle is charging"
         type: "boolean"
         acronym: "charging"
+        labels: ["yes","no"]
+      pluggedIn:
+        description: "If vehicle is pluggedIn"
+        type: "boolean"
+        acronym: "pluggedIn"
         labels: ["yes","no"]
       battery:
         description: "The battery level"
@@ -115,9 +125,11 @@ module.exports = (env) ->
       @statusPolltime = 60000
 
       @_engine = laststate?.engine?.value ? false
+      @_airco = laststate?.airco?.value ? false
       @_door = laststate?.door?.value ? false
       @_charging = laststate?.charging?.value ? false
       @_battery = laststate?.battery?.value
+      @_pluggedIn = laststate?.plugedIn?.value
       @_odo = laststate?.odo?.value
       @_lat = laststate?.lat?.value
       @_lon = laststate?.lon?.value
@@ -151,12 +163,10 @@ module.exports = (env) ->
       super()
 
     handleLocation: (location) =>
-      env.logger.debug "Location: " + JSON.stringify(location,null,2)
       @setLocation(location.latitude, location.longitude)
 
     handleOdo: (odo) =>
-      env.logger.debug "Odo status " + odo.value
-      @setOdo(Math.round odo.value)
+      @setOdo(odo.value)
 
     handleStatus: (status) =>
 
@@ -166,10 +176,10 @@ module.exports = (env) ->
         @setDoor(status.doorLock)
       if status.engine?
         @setEngine(status.engine)
-      if status.evStatus?.batteryCharge?
-        @setCharging(status.evStatus.batteryCharge)
-      if status.evStatus?.batteryStatus?
-        @setBattery(status.evStatus.batteryStatus)
+      if status.airCtrlOn?
+        @setAirco(status.airCtrlOn)
+      if status.evStatus?
+        @setEvStatus(status.evStatus)
 
       #@vehicleStatus
       ###
@@ -296,9 +306,11 @@ module.exports = (env) ->
       )
 
     getEngine: -> Promise.resolve(@_engine)
+    getAirco: -> Promise.resolve(@_airco)
     getDoor: -> Promise.resolve(@_door)
     getCharging: -> Promise.resolve(@_charging)
     getBattery: -> Promise.resolve(@_battery)
+    getPluggedIn: -> Promise.resolve(@_pluggedIn)
     getOdo: -> Promise.resolve(@_odo)
     getLat: -> Promise.resolve(@_lat)
     getLon: -> Promise.resolve(@_lon)
@@ -311,13 +323,17 @@ module.exports = (env) ->
       @_door = Boolean _status
       @emit 'door', _status
 
-    setCharging: (_status) =>
-      @_charging = Boolean _status
-      @emit 'charging', _status
+    setEvStatus: (evStatus) =>
+      @_battery = Number evStatus.batteryStatus
+      @emit 'battery', @_battery
+      @_pluggedIn = Number evStatus.batteryPlugin
+      @emit 'pluggedIn', @_pluggedIn
+      @_charging = Boolean evStatus.batteryCharge
+      @emit 'charging', @_charging
 
-    setBattery: (_status) =>
-      @_battery = Number _status
-      @emit 'battery', _status
+    setAirco: (_status) =>
+      @_airco = Boolean _status
+      @emit 'airco', _status
 
     setOdo: (_status) =>
       @_odo = Number _status
