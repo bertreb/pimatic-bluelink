@@ -96,10 +96,14 @@ module.exports = (env) ->
         type: "number"
         unit: 'km'
         acronym: "odo"
-      location:
-        description: "The cars location"
-        type: "string"
-        acronym: "lat/lon"
+      lat:
+        description: "The cars latitude"
+        type: "number"
+        acronym: "lat"
+      lon:
+        description: "The cars longitude"
+        type: "number"
+        acronym: "lon"
 
     
     constructor: (config, lastState, @plugin, client) ->
@@ -115,7 +119,8 @@ module.exports = (env) ->
       @_charging = laststate?.charging?.value ? false
       @_battery = laststate?.battery?.value
       @_odo = laststate?.odo?.value
-      @_location = laststate?.location?.value
+      @_lat = laststate?.lat?.value
+      @_lon = laststate?.lon?.value
 
       @plugin.on 'clientReady', () =>
         env.logger.debug "requesting vehicle"
@@ -145,14 +150,13 @@ module.exports = (env) ->
 
       super()
 
-    handleLocation: (status) =>
-      _location = status.latitude + ", "+ status.longitude
-      env.logger.debug "Location: " + _location
-      @setLocation(_location)
+    handleLocation: (location) =>
+      env.logger.debug "Location: " + JSON.stringify(location,null,2)
+      @setLocation(location.latitude, location.longitude)
 
-    handleOdo: (status) =>
-      env.logger.debug "Odo status " + status.value
-      @setOdo(Math.round status.value)
+    handleOdo: (odo) =>
+      env.logger.debug "Odo status " + odo.value
+      @setOdo(Math.round odo.value)
 
     handleStatus: (status) =>
 
@@ -296,7 +300,8 @@ module.exports = (env) ->
     getCharging: -> Promise.resolve(@_charging)
     getBattery: -> Promise.resolve(@_battery)
     getOdo: -> Promise.resolve(@_odo)
-    getLocation: -> Promise.resolve(@_location)
+    getLat: -> Promise.resolve(@_lat)
+    getLon: -> Promise.resolve(@_lon)
 
     setEngine: (_status) =>
       @_engine = Boolean _status
@@ -318,9 +323,11 @@ module.exports = (env) ->
       @_odo = Number _status
       @emit 'odo', _status
 
-    setLocation: (_location) =>
-      @_location = _location
-      @emit 'location', _location
+    setLocation: (_lat, _lon) =>
+      @_lat = _lat
+      @_lon = _lon
+      @emit 'lat', _lat
+      @emit 'lon', _lon
 
 
     destroy:() =>
