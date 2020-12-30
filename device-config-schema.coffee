@@ -14,6 +14,18 @@ module.exports = {
       type:
         description: "The cars type"
         type: "string"
+      defrost: 
+        description: "Deforsting the screen, when remote starting the airco"
+        type: "boolean"
+        default: false
+      windscreenHeating: 
+        description: "Windscreen heating, when remote starting the airco"
+        type: "boolean"
+        default: false
+      temperature: 
+        description: "Target car temperature (C), when remote starting the airco"
+        type: "number"
+        default: 20
     }
   }
 }
