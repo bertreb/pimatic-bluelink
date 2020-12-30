@@ -19,7 +19,7 @@ For now this plugin works only for Kia 'Uvo' cars
 ## Config of a KiaDevice
 
 Devices are added via the discovery function. Per registered Kia a KiaDevice is discovered unless the device is already in the config.
-The automatic generated Id must not change. Its the unique reference to your car. You can change the Pimatic device name after you have saved the device. For the Pimatic KiaDevice ID and Name the Kia Nickname is used. The vin and attributes are generated automaticaly and should not be changed. 
+The automatic generated Id must not change. Its the unique reference to your car. You can change the Pimatic device name after you have saved the device. For the Pimatic KiaDevice ID and Name the Kia Nickname is used. The vin and attributes are generated automaticaly and should not be changed.
 
 ```
 {
@@ -32,7 +32,7 @@ The automatic generated Id must not change. Its the unique reference to your car
 }
 ```
 
-The following attributes are updated and visible in the Gui. 
+The following attributes are updated and visible in the Gui.
 
 ```
 engine: "Status of engine (on/off)"
@@ -50,10 +50,10 @@ The car can be controlled via rules
 
 The action syntax:
 ```
-  bluelink <KiaDevice Id> [start $startOptionsVariable | startDefault | stop | lock | unlock | chargeStart | chargeStop ]
+  bluelink <KiaDevice Id> [start $startOptionsVariable | startDefault | stop |
+  lock | unlock | chargeStart | chargeStop ]
 ```
 The $startOptionsVariable syntax is a string with the following format
 [defrost:[true|false]] | [windscreenHeating:[true|false] | [temperature:number]
 You can change by name the default settings, for 1, 2 or all 3 options.
 Use 'startDefault' is you want to remote start the airco with the device defaults
-
