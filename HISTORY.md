@@ -1,4 +1,4 @@
 # Release History
 
-* 20201229, v0.0.1
+* 20201230, v0.0.2
 	* initial release

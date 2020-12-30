@@ -91,6 +91,16 @@ module.exports = (env) ->
         type: "number"
         unit: '%'
         acronym: "battery"
+      odo:
+        description: "The car odo value"
+        type: "number"
+        unit: 'km'
+        acronym: "odo"
+      location:
+        description: "The cars location"
+        type: "string"
+        acronym: "lat/lon"
+
     
     constructor: (config, lastState, @plugin, client) ->
       @config = config
@@ -104,6 +114,8 @@ module.exports = (env) ->
       @_door = laststate?.door?.value ? false
       @_charging = laststate?.charging?.value ? false
       @_battery = laststate?.battery?.value
+      @_odo = laststate?.odo?.value
+      @_location = laststate?.location?.value
 
       @plugin.on 'clientReady', () =>
         env.logger.debug "requesting vehicle"
@@ -117,6 +129,14 @@ module.exports = (env) ->
           @vehicle.status()
           .then (status)=>
             @handleStatus(status)
+            return @vehicle.location()
+          .then (location)=>
+            env.logger.debug "location " + JSON.stringify(location,null,2)
+            @handleLocation(location)
+            return @vehicle.odometer()
+          .then (odometer) =>
+            env.logger.debug "odo " + JSON.stringify(odometer,null,2)
+            @handleOdo(odometer)
           .catch (e) =>
             env.logger.debug "getStatus error: " + JSON.stringify(e,null,2)
         else
@@ -124,6 +144,15 @@ module.exports = (env) ->
         @statusTimer = setTimeout(getStatus, @statusPolltime)
 
       super()
+
+    handleLocation: (status) =>
+      _location = status.latitude + ", "+ status.longitude
+      env.logger.debug "Location: " + _location
+      @setLocation(_location)
+
+    handleOdo: (status) =>
+      env.logger.debug "Odo status " + status.value
+      @setOdo(Math.round status.value)
 
     handleStatus: (status) =>
 
@@ -266,22 +295,32 @@ module.exports = (env) ->
     getDoor: -> Promise.resolve(@_door)
     getCharging: -> Promise.resolve(@_charging)
     getBattery: -> Promise.resolve(@_battery)
+    getOdo: -> Promise.resolve(@_odo)
+    getLocation: -> Promise.resolve(@_location)
 
     setEngine: (_status) =>
-        @_engine = Boolean _status
-        @emit 'engine', _status
+      @_engine = Boolean _status
+      @emit 'engine', _status
 
     setDoor: (_status) =>
-        @_door = Boolean _status
-        @emit 'door', _status
+      @_door = Boolean _status
+      @emit 'door', _status
 
     setCharging: (_status) =>
-        @_charging = Boolean _status
-        @emit 'charging', _status
+      @_charging = Boolean _status
+      @emit 'charging', _status
 
     setBattery: (_status) =>
-        @_battery = Number _status
-        @emit 'battery', _status
+      @_battery = Number _status
+      @emit 'battery', _status
+
+    setOdo: (_status) =>
+      @_odo = Number _status
+      @emit 'odo', _status
+
+    setLocation: (_location) =>
+      @_location = _location
+      @emit 'location', _location
 
 
     destroy:() =>
