@@ -45,6 +45,7 @@ charging: "If vehicle is charging"
 pluggedIn: "If vehicle is pluggedIn"
 battery: "The battery level (0-100%)"
 odo: "The car odo value (km)"
+speed: "The car speed (km/h)"
 lat: "The cars latitude"
 lon: "The cars longitude"
 ```

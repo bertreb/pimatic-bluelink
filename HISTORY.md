@@ -5,4 +5,4 @@
 * 20201231, v0.0.9
 	* edit update status
 * 20201231, v0.0.10
-	* dual timer
+	* dual timer moved to device config
