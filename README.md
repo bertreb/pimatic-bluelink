@@ -7,11 +7,11 @@ For now this plugin works only for Kia 'Uvo' cars
 ## Config of the plugin
 ```
 {
-  username:        "The username of your Kia Uvo account"
-  password:        "The password of your Kia Uvo account"
-  region:  		     "The region ('EU', US or 'CA') only tested for 'EU'
-  pin:			       " The Uvo pin for get access to the car"
-  debug:           "Debug mode. Writes debug messages to the Pimatic log, if set to true."
+  username:  "The username of your Kia Uvo account"
+  password:  "The password of your Kia Uvo account"
+  region:    "The region ('EU', US or 'CA') only tested for 'EU'
+  pin:       "The Uvo pin for get access to the car"
+  debug:     "Debug mode. Writes debug messages to the Pimatic log, if set to true."
 }
 ```
 
