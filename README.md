@@ -7,12 +7,11 @@ For now this plugin works only for Kia 'Uvo' cars
 ## Config of the plugin
 ```
 {
-  username:     "The username of your Kia Uvo account"
-  password:     "The password of your Kia Uvo account"
-  region:  		"The region ('EU', US or 'CA') only tested for 'EU'
-  pin:			" The Uvo pin for get access to the car"
-  pollTime:		"The time between status poll (default 2 minutes)"
-  debug:        "Debug mode. Writes debug messages to the Pimatic log, if set to true."
+  username:        "The username of your Kia Uvo account"
+  password:        "The password of your Kia Uvo account"
+  region:  		     "The region ('EU', US or 'CA') only tested for 'EU'
+  pin:			       " The Uvo pin for get access to the car"
+  debug:           "Debug mode. Writes debug messages to the Pimatic log, if set to true."
 }
 ```
 
@@ -20,6 +19,8 @@ For now this plugin works only for Kia 'Uvo' cars
 
 Devices are added via the discovery function. Per registered Kia a KiaDevice is discovered unless the device is already in the config.
 The automatic generated Id must not change. Its the unique reference to your car. You can change the Pimatic device name after you have saved the device. For the Pimatic KiaDevice ID and Name the Kia Nickname is used. The vin and attributes are generated automaticaly and should not be changed.
+
+There are 2 timers, pollTimePassive and pollTimeAtive. The polling switches to pollTimeActive when the engine is set to on or the doors are unlocked or the airco is turned on or when te battery is charging. If all those 4 conditions are false the polling switches to pollTimePassive. This mechanism prevents unnecessary status polls.
 
 ```
 {
@@ -29,6 +30,8 @@ The automatic generated Id must not change. Its the unique reference to your car
   defrost: "default value for remote start"
   windscreenHeating: "default value for remote start"
   temperature: "default value for remote start"
+  pollTimePassive: "The time between status poll in passive mode (default 3600000 ms (is 1 hour))"
+  pollTimeActive:  "The time between status poll in active mode (default 120000 ms (is 2 minutes))"
 }
 ```
 
@@ -59,3 +62,7 @@ The $startOptionsVariable syntax is a string variable with the following format:
 ```
 You can change by name the default settings, for 1, 2 or all 3 options.
 Use 'startDefault' is you want to remote start the airco with the device defaults
+You can use an expression for the $startOptionsVariable. In this expression variables can be used.
+
+An example: $startOptionsVariable expression = "temperature:$temp-variable,defrost:$defrost-variable,windscreenHeating:$windscreenHeating-variable"
+

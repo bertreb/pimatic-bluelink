@@ -16,10 +16,6 @@ module.exports = {
     pin:
       descpription: "The pin for unlocking"
       type: "string"
-    pollTime:
-      description: "The polltime in ms between status polls"
-      type: "number"
-      default: 120000
     debug:
       description: "Debug mode. Writes debug messages to the pimatic log, if set to true."
       type: "boolean"

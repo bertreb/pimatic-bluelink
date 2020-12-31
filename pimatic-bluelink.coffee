@@ -18,7 +18,6 @@ module.exports = (env) ->
       @pin = @config.pin
 
       @clientReady = false
-      @pollTime = @config.pollTime ? 3600000 # 1 hour
 
       @framework.variableManager.waitForInit()
       .then ()=>
@@ -107,6 +106,11 @@ module.exports = (env) ->
         type: "number"
         unit: 'km'
         acronym: "odo"
+      speed:
+        description: "Speed of the car"
+        type: "number"
+        acronym: "speed"
+        unit: "km/h"
       lat:
         description: "The cars latitude"
         type: "number"
@@ -123,9 +127,12 @@ module.exports = (env) ->
       @name = @config.name
       @client = @plugin.client
 
-      @statusPolltime = @plugin.pollTime
+      @pollTimePassive = @config.pollTimePassive ? 3600000 # 1 hour
+      @pollTimeActive = @config.pollTimeActive ? 120000 # 2 minutes
+      @currentPollTime = @pollTimeActive
 
       @_engine = laststate?.engine?.value ? false
+      @_speed = laststate?.speed?.value ? 0
       @_airco = laststate?.airco?.value ? false
       @_door = laststate?.door?.value ? false
       @_charging = laststate?.charging?.value ? false
@@ -135,7 +142,8 @@ module.exports = (env) ->
       @_lat = laststate?.lat?.value
       @_lon = laststate?.lon?.value
 
-      @plugin.on 'clientReady', () =>
+
+      @plugin.on 'clientReady', @clientListener = () =>
         env.logger.debug "requesting vehicle"
         @vehicle = @plugin.client.getVehicle(@config.vin)
         env.logger.debug "starting status update cyle"
@@ -146,9 +154,9 @@ module.exports = (env) ->
           env.logger.debug "requesting vehicle"
           @vehicle = @plugin.client.getVehicle(@config.vin)
           env.logger.debug "starting status update cyle"
-          getStatus()
+          @getStatus()
 
-      getStatus = () =>
+      @getStatus = () =>
         if @plugin.clientReady
           env.logger.debug "requesting status"
           @vehicle.status()
@@ -164,15 +172,17 @@ module.exports = (env) ->
             @handleOdo(odometer)
           .catch (e) =>
             env.logger.debug "getStatus error: " + JSON.stringify(e,null,2)
-          @statusTimer = setTimeout(getStatus, @statusPolltime)
+          @statusTimer = setTimeout(@getStatus, @currentPollTime)
+          env.logger.debug "Next poll in " + @currentPollTime + " ms"
         else
-          env.logger.debug "requesting status, client not ready"
-          @statusTimer = setTimeout(getStatus, 5000)
+          env.logger.debug "(re)requesting status in 5 seconds, client not ready"
+          @statusTimer = setTimeout(@getStatus, 5000)
 
       super()
 
     handleLocation: (location) =>
       @setLocation(location.latitude, location.longitude)
+      @setSpeed(location.speed.value)
 
     handleOdo: (odo) =>
       @setOdo(odo.value)
@@ -187,6 +197,11 @@ module.exports = (env) ->
         @setAirco(status.airCtrlOn)
       if status.evStatus?
         @setEvStatus(status.evStatus)
+
+      #update polltime to active if door is open, charging, airco or engine is on
+      active = (not Boolean status.doorLock) or (Boolean status.engine) or (Boolean status.evStatus.batteryCharge) or (Boolean status.airCtrlOn)
+      env.logger.debug "Car status PollTimeActive is " + active
+      @setPollTime(active)
 
     parseOptions: (_options) ->
       climateOptions =
@@ -223,6 +238,7 @@ module.exports = (env) ->
             .then (resp)=>
               env.logger.debug "Started: " + JSON.stringify(resp,null,2)
               @setEngine(true)
+              @setPollTime(true) # set to active poll
               resolve()
             .catch (err) =>
               env.logger.debug "Error start car: " + JSON.stringify(err,null,2)
@@ -249,6 +265,7 @@ module.exports = (env) ->
             @vehicle.unlock()
             .then (resp)=>
               @setDoor(false)
+              @setPollTime(true) # set to active poll
               env.logger.debug "Unlocked: " + JSON.stringify(resp,null,2)
               resolve()
             .catch (err) =>
@@ -258,6 +275,7 @@ module.exports = (env) ->
             @vehicle.startCharge()
             .then (resp)=>
               @setCharge(true)
+              @setPollTime(true) # set to active poll
               env.logger.debug "startCharge: " + JSON.stringify(resp,null,2)
               resolve()
             .catch (err) =>
@@ -285,12 +303,35 @@ module.exports = (env) ->
     getBattery: -> Promise.resolve(@_battery)
     getPluggedIn: -> Promise.resolve(@_pluggedIn)
     getOdo: -> Promise.resolve(@_odo)
+    getSpeed: -> Promise.resolve(@_speed)
     getLat: -> Promise.resolve(@_lat)
     getLon: -> Promise.resolve(@_lon)
+
+    setPollTime: (active) =>
+      # true is active, false is passive
+      if (active and @currentPollTime == @pollTimeActive) or (!active and @currentPollTime == @pollTimePassive) then return
+
+      #env.logger.debug("Test for active " + active + ", @currentPollTime:"+@currentPollTime+", @pollTimePassive:"+@pollTimePassive+", == "+ (@currentPollTimer == @pollTimePassive))
+      if (active) and (@currentPollTime == @pollTimePassive)
+        clearTimeout(@statusTimer) if @statusTimer?
+        @currentPollTime = @pollTimeActive
+        env.logger.debug "Switching to active poll, with polltime of " + @pollTimeActive + " ms"
+        setTimeout(@getStatus,10000)
+        return
+
+      if not active and @currentPollTime == @pollTimeActive
+        clearTimeout(@statusTimer) if @statusTimer?
+        @currentPollTime = @pollTimePassive
+        env.logger.debug "Switching to passive poll, with polltime of " + @pollTimePassive + " ms"
+        setTimeout(@getStatus,10000)
 
     setEngine: (_status) =>
       @_engine = Boolean _status
       @emit 'engine', Boolean _status
+
+    setSpeed: (_status) =>
+      @_speed = Number _status
+      @emit 'speed', Number _status
 
     setDoor: (_status) =>
       @_door = Boolean _status
@@ -321,15 +362,16 @@ module.exports = (env) ->
       @emit 'lat', _lat
       @emit 'lon', _lon
 
-    setCharge: (charge) =>
-      @_charging = Boolean charge
-      @emit 'charging', Boolean charge
-      if charge
-        @_pluggedIn = true
+    setCharge: (charging) =>
+      @_charging = Boolean charging
+      @emit 'charging', Boolean charging
+      if charging
+        @_pluggedIn = true # if charging, must be pluggedIn
         @emit 'pluggedIn', @_pluggedIn
 
     destroy:() =>
       clearTimeout(@statusTimer) if @statusTimer?
+      @removeListener('clientReady', @clientListener)
       super()
 
   class BluelinkActionProvider extends env.actions.ActionProvider
