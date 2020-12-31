@@ -65,8 +65,8 @@ You can change by name the default settings, for 1, 2 or all 3 options.
 Use 'startDefault' is you want to remote start the airco with the device defaults
 You can use an expression for the $startOptionsVariable. In this expression variables can be used.
 
-An example: $startOptionsVariable: (use the double quotes when you add the expression in the startOptionsVariable)
+An example: $startOptionsVariable: 
 ```
 "temperature:$temp-variable,defrost:$defrost-variable,windscreenHeating:$windscreenHeating-variable"
 ```
-
+(use the double quotes when you add the expression in the startOptionsVariable)
