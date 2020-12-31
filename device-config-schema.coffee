@@ -33,7 +33,7 @@ module.exports = {
       pollTimeActive:
         description: "The polltime in ms between status polls in active mode (2 minutes)"
         type: "number"
-        default: 12000
+        default: 120000
     }
   }
 }
