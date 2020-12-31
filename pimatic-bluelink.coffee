@@ -18,7 +18,7 @@ module.exports = (env) ->
       @pin = @config.pin
 
       @clientReady = false
-      @pollTime = @config.pollTime ? 300000 # 5 minutes
+      @pollTime = @config.pollTime ? 3600000 # 1 hour
 
       @framework.variableManager.waitForInit()
       .then ()=>
@@ -130,7 +130,7 @@ module.exports = (env) ->
       @_door = laststate?.door?.value ? false
       @_charging = laststate?.charging?.value ? false
       @_battery = laststate?.battery?.value
-      @_pluggedIn = laststate?.plugedIn?.value
+      @_pluggedIn = laststate?.pluggedIn?.value
       @_odo = laststate?.odo?.value
       @_lat = laststate?.lat?.value
       @_lon = laststate?.lon?.value
@@ -290,40 +290,40 @@ module.exports = (env) ->
 
     setEngine: (_status) =>
       @_engine = Boolean _status
-      @emit 'engine', @_engine
+      @emit 'engine', Boolean _status
 
     setDoor: (_status) =>
       @_door = Boolean _status
-      @emit 'door', @_door
+      @emit 'door', Boolean _status
 
     setEvStatus: (evStatus) =>
       @_battery = Number evStatus.batteryStatus
-      @emit 'battery', @_battery
+      @emit 'battery', Number evStatus.batteryStatus
       @_pluggedIn = evStatus.batteryPlugin > 0
-      @emit 'pluggedIn', @_pluggedIn
+      @emit 'pluggedIn', (evStatus.batteryPlugin > 0)
       @_charging = Boolean evStatus.batteryCharge
-      @emit 'charging', @_charging
+      @emit 'charging', Boolean evStatus.batteryCharge
       if @_charging
         @_pluggedIn = true
-        @emit 'pluggedIn', @_pluggedIn
+        @emit 'pluggedIn', (evStatus.batteryPlugin > 0)
 
     setAirco: (_status) =>
       @_airco = Boolean _status
-      @emit 'airco', @_airco
+      @emit 'airco', Boolean _status
 
     setOdo: (_status) =>
       @_odo = Number _status
-      @emit 'odo', @_odo
+      @emit 'odo', Number _status
 
     setLocation: (_lat, _lon) =>
       @_lat = _lat
       @_lon = _lon
-      @emit 'lat', @_lat
-      @emit 'lon', @_lon
+      @emit 'lat', _lat
+      @emit 'lon', _lon
 
     setCharge: (charge) =>
       @_charging = Boolean charge
-      @emit 'charging', @_charging
+      @emit 'charging', Boolean charge
       if charge
         @_pluggedIn = true
         @emit 'pluggedIn', @_pluggedIn
