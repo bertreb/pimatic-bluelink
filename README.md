@@ -62,7 +62,7 @@ The $startOptionsVariable syntax is a string variable with the following format:
 [defrost:[true|false]] | [windscreenHeating:[true|false] | [temperature:number]
 ```
 You can change by name the default settings, for 1, 2 or all 3 options.
-Use 'startDefault' is you want to remote start the airco with the device defaults
+Use 'startDefault' is you want to remote start the airco with the device defaults.
 You can use an expression for the $startOptionsVariable. In this expression variables can be used.
 
 An example: $startOptionsVariable: 
