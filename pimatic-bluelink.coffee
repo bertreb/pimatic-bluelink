@@ -19,20 +19,16 @@ module.exports = (env) ->
 
       @clientReady = false
 
-      @framework.variableManager.waitForInit()
-      .then ()=>
-        @client = new Bluelinky(
-          username: @username
-          password: @password
-          region: @region
-          pin: @pin
-        )
-        @client.on 'ready',() =>
-          env.logger.debug "Plugin bluelink client ready"
-          @clientReady = true
-          @emit "clientReady"
-      .catch (err)=>
-        env.logger.debug "Bluelink error client created: " + JSON.stringify(err,null,2)
+      @client = new Bluelinky(
+        username: @username
+        password: @password
+        region: @region
+        pin: @pin
+      )
+      @client.on 'ready',() =>
+        env.logger.debug "Plugin bluelink client ready"
+        @clientReady = true
+        @emit "clientReady"
 
 
       @framework.deviceManager.registerDeviceClass('KiaDevice', {
@@ -142,16 +138,19 @@ module.exports = (env) ->
       @_lat = laststate?.lat?.value
       @_lon = laststate?.lon?.value
 
+      @vehicle = null
 
       @plugin.on 'clientReady', @clientListener = () =>
-        env.logger.debug "requesting vehicle"
-        @vehicle = @plugin.client.getVehicle(@config.vin)
-        env.logger.debug "starting status update cyle"
+        unless @statusTimer? 
+          env.logger.debug "Plugin ClientReady, requesting vehicle"
+          @vehicle = @plugin.client.getVehicle(@config.vin)
+          env.logger.debug "starting status update cyle"
+          @getStatus()
 
       @framework.variableManager.waitForInit()
       .then ()=>
-        unless @plugin.clientReady and @statusTimer?
-          env.logger.debug "requesting vehicle"
+        if @plugin.clientReady and not @statusTimer?
+          env.logger.debug "Device ready, requesting vehicle"
           @vehicle = @plugin.client.getVehicle(@config.vin)
           env.logger.debug "starting status update cyle"
           @getStatus()
@@ -290,6 +289,11 @@ module.exports = (env) ->
             .catch (err) =>
               env.logger.debug "Error stopCharge car: " + JSON.stringify(err,null,2)
               reject()
+          when "refresh"
+            clearTimeout(@statusTimer) if @statusTimer?
+            setTimeout(@getStatus,10000)              
+            env.logger.debug "refreshing status: " + JSON.stringify(resp,null,2)
+            resolve()
           else
             env.logger.debug "Unknown command " + command
             reject()
@@ -446,7 +450,14 @@ module.exports = (env) ->
               setCommand('stopCharge')
               match = m.getFullMatch()
             )
-          )])
+          ),
+          ((m) =>
+            return m.match(' refresh', (m) =>
+              setCommand('refresh')
+              match = m.getFullMatch()
+            )
+          )
+        ])
 
       match = m.getFullMatch()
       if match? #m.hadMatch()
