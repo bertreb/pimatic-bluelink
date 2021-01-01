@@ -302,7 +302,7 @@ module.exports = (env) ->
               reject()
           when "refresh"
             clearTimeout(@statusTimer) if @statusTimer?
-            setTimeout(@getStatus,10000)              
+            @getStatus()           
             env.logger.debug "refreshing status: " + JSON.stringify(resp,null,2)
             resolve()
           else
