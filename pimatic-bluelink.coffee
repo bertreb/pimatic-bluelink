@@ -208,8 +208,8 @@ module.exports = (env) ->
       if status.evStatus?
         @setEvStatus(status.evStatus)
 
-      #update polltime to active if door is open, charging, airco or engine is on
-      active = (not Boolean status.doorLock) or (Boolean status.engine) or (Boolean status.evStatus.batteryCharge) or (Boolean status.airCtrlOn)
+      #update polltime to active if engine is on, charging or airco is on 
+      active = (Boolean status.engine) or (Boolean status.evStatus.batteryCharge) or (Boolean status.airCtrlOn)
       env.logger.debug "Car status PollTimeActive is " + active
       @setPollTime(active)
 

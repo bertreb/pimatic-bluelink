@@ -20,7 +20,7 @@ For now this plugin works only for Kia 'Uvo' cars
 Devices are added via the discovery function. Per registered Kia a KiaDevice is discovered unless the device is already in the config.
 The automatic generated Id must not change. Its the unique reference to your car. You can change the Pimatic device name after you have saved the device. For the Pimatic KiaDevice ID and Name the Kia Nickname is used. The vin and attributes are generated automaticaly and should not be changed.
 
-There are 2 timers, pollTimePassive and pollTimeAtive. The polling switches to pollTimeActive when the engine is set to on or the doors are unlocked or the airco is turned on or when te battery is charging. If all those 4 conditions are false the polling switches to pollTimePassive. This mechanism prevents unnecessary status polls.
+There are 2 timers, pollTimePassive and pollTimeAtive. The polling switches to pollTimeActive when the engine is set to on or the airco is turned on or when te battery is charging. If all those 3 conditions are false the polling switches to pollTimePassive. This mechanism prevents unnecessary status polls.
 
 ```
 {
