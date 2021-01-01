@@ -247,7 +247,6 @@ module.exports = (env) ->
         switch command
           when "start"
             env.logger.debug "Start with options: " + JSON.stringify(@parseOptions(options),null,2)
-            return
             @vehicle.start(@parseOptions(options))
             .then (resp)=>
               env.logger.debug "Started: " + JSON.stringify(resp,null,2)

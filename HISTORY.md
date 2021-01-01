@@ -18,5 +18,5 @@
 	* removed doorLock from activeTimer
 * 20210101, v0.1.4
 	* fix temperature variable
-* 20210101, v0.1.5
+* 20210101, v0.1.6
 	* fix start options
