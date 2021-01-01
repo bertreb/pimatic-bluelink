@@ -12,3 +12,5 @@
 	* edit startup handling
 	* set default active timer to 10 minutes
 	* add refresh command
+* 20210101, v0.1.2
+	* changed default passiveTime to 1 hour (3600000 ms)
