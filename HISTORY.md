@@ -8,3 +8,7 @@
 	* dual timer moved to device config
 * 20201231, v0.0.12
 	* add refresh
+* 20210101, v0.1.0
+	* edit startup handling
+	* set default active timer to 10 minutes
+	* add refresh command

@@ -17,18 +17,20 @@ module.exports = (env) ->
       @region = @config.region ? 'EU'
       @pin = @config.pin
 
+      @client = null
       @clientReady = false
 
-      @client = new Bluelinky(
-        username: @username
-        password: @password
-        region: @region
-        pin: @pin
-      )
-      @client.on 'ready',() =>
-        env.logger.debug "Plugin bluelink client ready"
-        @clientReady = true
-        @emit "clientReady"
+      @framework.on 'after init', ()=>
+        @client = new Bluelinky(
+          username: @username
+          password: @password
+          region: @region
+          pin: @pin
+        )
+        @client.on 'ready',() =>
+          env.logger.debug "Plugin emit clientReady"
+          @clientReady = true
+          @emit "clientReady"
 
 
       @framework.deviceManager.registerDeviceClass('KiaDevice', {
@@ -121,10 +123,11 @@ module.exports = (env) ->
       @config = config
       @id = @config.id
       @name = @config.name
+
       @client = @plugin.client
 
       @pollTimePassive = @config.pollTimePassive ? 3600000 # 1 hour
-      @pollTimeActive = @config.pollTimeActive ? 120000 # 2 minutes
+      @pollTimeActive = @config.pollTimeActive ? 600000 # 10 minutes
       @currentPollTime = @pollTimeActive
 
       @_engine = laststate?.engine?.value ? false
@@ -137,6 +140,8 @@ module.exports = (env) ->
       @_odo = laststate?.odo?.value
       @_lat = laststate?.lat?.value
       @_lon = laststate?.lon?.value
+      retries = 0
+      maxRetries = 20
 
       @vehicle = null
 
@@ -144,15 +149,17 @@ module.exports = (env) ->
         unless @statusTimer? 
           env.logger.debug "Plugin ClientReady, requesting vehicle"
           @vehicle = @plugin.client.getVehicle(@config.vin)
-          env.logger.debug "starting status update cyle"
+          env.logger.debug "From plugin start - starting status update cyle"
           @getStatus()
+        else
+          env.logger.debug "Error: plugin start but @statusTimer alredy running!"
 
       @framework.variableManager.waitForInit()
       .then ()=>
         if @plugin.clientReady and not @statusTimer?
-          env.logger.debug "Device ready, requesting vehicle"
+          env.logger.debug "ClientReady ready, Device starting, requesting vehicle"
           @vehicle = @plugin.client.getVehicle(@config.vin)
-          env.logger.debug "starting status update cyle"
+          env.logger.debug "From device start - starting status update cyle"
           @getStatus()
 
       @getStatus = () =>
@@ -175,7 +182,11 @@ module.exports = (env) ->
           env.logger.debug "Next poll in " + @currentPollTime + " ms"
         else
           env.logger.debug "(re)requesting status in 5 seconds, client not ready"
-          @statusTimer = setTimeout(@getStatus, 5000)
+          retries += 1
+          if retries < maxRetries
+            @statusTimer = setTimeout(@getStatus, 5000)
+          else
+            env.logger.debug "Max number of retries(#{maxRetries}) reached, Client not ready, stop trying"
 
       super()
 
@@ -320,14 +331,14 @@ module.exports = (env) ->
         clearTimeout(@statusTimer) if @statusTimer?
         @currentPollTime = @pollTimeActive
         env.logger.debug "Switching to active poll, with polltime of " + @pollTimeActive + " ms"
-        setTimeout(@getStatus,10000)
+        setTimeout(@getStatus, @pollTimeActive)
         return
 
       if not active and @currentPollTime == @pollTimeActive
         clearTimeout(@statusTimer) if @statusTimer?
         @currentPollTime = @pollTimePassive
         env.logger.debug "Switching to passive poll, with polltime of " + @pollTimePassive + " ms"
-        setTimeout(@getStatus,10000)
+        setTimeout(@getStatus, @pollTimePassive)
 
     setEngine: (_status) =>
       @_engine = Boolean _status

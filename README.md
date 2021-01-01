@@ -31,7 +31,7 @@ There are 2 timers, pollTimePassive and pollTimeAtive. The polling switches to p
   windscreenHeating: "default value for remote start"
   temperature: "default value for remote start"
   pollTimePassive: "The time between status poll in passive mode (default 3600000 ms (is 1 hour))"
-  pollTimeActive:  "The time between status poll in active mode (default 120000 ms (is 2 minutes))"
+  pollTimeActive:  "The time between status poll in active mode (default 600000 ms (is 10 minutes))"
 }
 ```
 
@@ -57,6 +57,15 @@ The action syntax:
   bluelink <KiaDevice Id> [start $startOptionsVariable | startDefault | stop |
       lock | unlock | chargeStart | chargeStop | refresh ]
 ```
+Commands:
+- start: this command starts the climate control of the car with options defrost, windscreenHeating and temperature
+- stop: ends the start action
+- lock: locks the doors
+- unlock: unlocks the doors
+- chargeStart: start charging (when pluggedIn)
+- chargeStop: stop charging
+- refresh: refresh the car status data
+
 The $startOptionsVariable syntax is a string variable with the following format:
 ```
 [defrost:[true|false]] | [windscreenHeating:[true|false] | [temperature:number]

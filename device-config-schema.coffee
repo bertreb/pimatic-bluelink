@@ -31,9 +31,9 @@ module.exports = {
         type: "number"
         default: 36000000
       pollTimeActive:
-        description: "The polltime in ms between status polls in active mode (2 minutes)"
+        description: "The polltime in ms between status polls in active mode (10 minutes)"
         type: "number"
-        default: 120000
+        default: 600000
     }
   }
 }
