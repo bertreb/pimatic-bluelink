@@ -229,18 +229,13 @@ module.exports = (env) ->
             env.logger.debug "_key: " + _key + ", _val: " + _val
             switch _key
               when "defrost"
-                climateOptions.defrost = Boolean _val
+                climateOptions.defrost = (if _val is "false" then false else true)
               when "windscreenHeating"
-                climateOptions.windscreenHeating = Boolean _val
+                climateOptions.windscreenHeating = (if _val is "false" then false else true)
               when "temperature"
                 # check if number
-                unless Number.isNaN(_val)
+                unless Number.isNaN(Number _val)
                   climateOptions.temperature = Number _val
-                else
-                  _val2 = _val.slice(1) if _val.indexOf('$') >= 0
-                  _val3 = @framework.variableManager.getVariableValue(_val2)
-                  unless Number.isNaN(_val3)
-                    climateOptions.temperature = Number _val3
         catch err
           env.logger.debug "Handled error in parseOptions " + err
 
@@ -252,6 +247,7 @@ module.exports = (env) ->
         switch command
           when "start"
             env.logger.debug "Start with options: " + JSON.stringify(@parseOptions(options),null,2)
+            return
             @vehicle.start(@parseOptions(options))
             .then (resp)=>
               env.logger.debug "Started: " + JSON.stringify(resp,null,2)
