@@ -16,3 +16,5 @@
 	* changed default passiveTime to 1 hour (3600000 ms)
 * 20210101, v0.1.3
 	* removed doorLock from activeTimer
+* 20210101, v0.1.4
+	* fix temperature variable

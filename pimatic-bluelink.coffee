@@ -226,13 +226,21 @@ module.exports = (env) ->
             tokens = parameter.split(":")
             _key = tokens[0].trim()
             _val = tokens[1].trim()
+            env.logger.debug "_key: " + _key + ", _val: " + _val
             switch _key
               when "defrost"
                 climateOptions.defrost = Boolean _val
               when "windscreenHeating"
                 climateOptions.windscreenHeating = Boolean _val
               when "temperature"
-                climateOptions.temperature = Number _val
+                # check if number
+                unless Number.isNaN(_val)
+                  climateOptions.temperature = Number _val
+                else
+                  _val2 = _val.slice(1) if _val.indexOf('$') >= 0
+                  _val3 = @framework.variableManager.getVariableValue(_val2)
+                  unless Number.isNaN(_val3)
+                    climateOptions.temperature = Number _val3
         catch err
           env.logger.debug "Handled error in parseOptions " + err
 
