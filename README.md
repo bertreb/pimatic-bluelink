@@ -2,22 +2,23 @@
 Plugin for Bluelink connected cars
 
 The plugin can be installed via the plugins page of Pimatic.
-For now this plugin works only for Kia 'Uvo' cars
+This plugin works for Kia and Hyundia bluelink connected cars.
 
 ## Config of the plugin
 ```
 {
-  username:  "The username of your Kia Uvo account"
-  password:  "The password of your Kia Uvo account"
+  username:  "The username of your Kia / Hyundai account"
+  password:  "The password of your Kia / Hyundai account"
   region:    "The region ('EU', US or 'CA') only tested for 'EU'
-  pin:       "The Uvo pin for get access to the car"
+  pin:       "The pin for get access to the car"
+  brand:     "The used brand: Kia or Hyundai (default kia)"
   debug:     "Debug mode. Writes debug messages to the Pimatic log, if set to true."
 }
 ```
 
-## Config of a KiaDevice
+## Config of a KiaDevice or HyundaiDevice
 
-Devices are added via the discovery function. Per registered Kia a KiaDevice is discovered unless the device is already in the config.
+Devices are added via the discovery function. Per registered Kia a KiaDevice or per registered Hyundai a HyundaiDevice is discovered unless the device is already in the config.
 The automatic generated Id must not change. Its the unique reference to your car. You can change the Pimatic device name after you have saved the device. For the Pimatic KiaDevice ID and Name the Kia Nickname is used. The vin and attributes are generated automaticaly and should not be changed.
 
 There are 2 timers, pollTimePassive and pollTimeAtive. The polling switches to pollTimeActive when the engine is set to on or the airco is turned on or when te battery is charging. If all those 3 conditions are false the polling switches to pollTimePassive. This mechanism prevents unnecessary status polls.
@@ -54,7 +55,7 @@ The car can be controlled via rules
 
 The action syntax:
 ```
-  bluelink <KiaDevice Id> [start $startOptionsVariable | startDefault | stop |
+  bluelink <KiaDevice/Hyundai Id> [start $startOptionsVariable | startDefault | stop |
       lock | unlock | chargeStart | chargeStop | refresh ]
 ```
 Commands:
@@ -79,3 +80,8 @@ An example: $startOptionsVariable:
 "temperature:$temp-variable,defrost:$defrost-variable,windscreenHeating:$windscreenHeating-variable"
 ```
 (use the double quotes when you add the expression in the startOptionsVariable)
+
+The HyundaiDevice is still in alfa test. You are welcome to test it.
+
+----
+This plugin needs minimal node version 10!

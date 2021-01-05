@@ -16,6 +16,11 @@ module.exports = {
     pin:
       descpription: "The pin for unlocking"
       type: "string"
+    brand:
+      description: "The supported car brand"
+      type: "string"
+      enum: ["kia","hyundai"]
+      default: "kia"
     debug:
       description: "Debug mode. Writes debug messages to the pimatic log, if set to true."
       type: "boolean"

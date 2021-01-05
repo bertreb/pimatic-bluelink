@@ -20,3 +20,5 @@
 	* fix temperature variable
 * 20210101, v0.1.6
 	* fix start options
+* 20210101, v0.2.0
+	* added Hyundai support

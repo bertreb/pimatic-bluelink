@@ -3,7 +3,7 @@ module.exports = (env) ->
   assert = env.require 'cassert'
   M = env.matcher
   _ = require('lodash')
-  Bluelinky = require('kuvork')
+  #Bluelinky = require('kuvork')
 
   class BluelinkPlugin extends env.plugins.Plugin
     init: (app, @framework, @config) =>
@@ -11,6 +11,14 @@ module.exports = (env) ->
       pluginConfigDef = require './pimatic-bluelink-config-schema'
 
       @deviceConfigDef = require("./device-config-schema")
+
+      @brand = @config.brand ? "kia"
+      if @brand is "hyundai"
+        Bluelinky = require('bluelinky')
+        @_discoveryClass = "HuyndaiDevice"
+      else
+        Bluelinky = require('kuvork')
+        @_discoveryClass = "KiaDevice"
 
       @username = @config.username # "email@domain.com";
       @password = @config.password #"a1b2c3d4";
@@ -27,15 +35,25 @@ module.exports = (env) ->
           region: @region
           pin: @pin
         )
+
         @client.on 'ready',() =>
           env.logger.debug "Plugin emit clientReady"
           @clientReady = true
           @emit "clientReady"
 
+        @client.on 'error',(err) =>
+          env.logger.debug "Bluelink login error: " + JSON.stringify(err,null,2)
+          @clientReady = false
+
 
       @framework.deviceManager.registerDeviceClass('KiaDevice', {
         configDef: @deviceConfigDef.KiaDevice,
         createCallback: (config, lastState) => new KiaDevice(config, lastState, @, @client, @framework)
+      })
+
+      @framework.deviceManager.registerDeviceClass('HyundaiDevice', {
+        configDef: @deviceConfigDef.HyundaiDevice,
+        createCallback: (config, lastState) => new HyundaiDevice(config, lastState, @, @client, @framework)
       })
 
       @framework.ruleManager.addActionProvider(new BluelinkActionProvider(@framework))
@@ -56,7 +74,7 @@ module.exports = (env) ->
                 config =
                   id: (carConfig.nickname).split(' ').join("_")
                   name: carConfig.nickname
-                  class: "KiaDevice"
+                  class: @_discoveryClass
                   vin: carConfig.vin
                   vehicleId: carConfig.id
                   type: carConfig.name
@@ -66,7 +84,8 @@ module.exports = (env) ->
           )
       )
 
-  class KiaDevice extends env.devices.Device
+
+  class BluelinkDevice extends env.devices.Device
 
     attributes:
       engine:
@@ -508,6 +527,11 @@ module.exports = (env) ->
         ).catch((err)=>
           return __("\"%s\" Rule not executed", "")
         )
+
+  class KiaDevice extends BluelinkDevice
+
+  class HyundaiDevice extends BluelinkDevice
+
 
   bluelinkPlugin = new BluelinkPlugin
   return bluelinkPlugin
