@@ -30,7 +30,7 @@
   "configSchema": "pimatic-bluelink-config-schema.coffee",
   "dependencies": {
     "bluelinky": "^5.2.3",
-    "kuvork": "^6.0.0-alpha4",
+    "kuvork": "^5.4.4",
     "lodash": "^4.17.15"
   },
   "peerDependencies": {
