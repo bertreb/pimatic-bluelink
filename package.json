@@ -22,7 +22,7 @@
     "cleaner",
     "ecovacs"
   ],
-  "version": "0.2.5",
+  "version": "0.2.6",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bertreb/pimatic-bluelink.git"

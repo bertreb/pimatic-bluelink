@@ -3,6 +3,8 @@ module.exports = (env) ->
   assert = env.require 'cassert'
   M = env.matcher
   _ = require('lodash')
+  fs = require('fs')
+  path = require('path')
   #Bluelinky = require('kuvork')
 
   class BluelinkPlugin extends env.plugins.Plugin
@@ -107,12 +109,12 @@ module.exports = (env) ->
         description: "If vehicle is charging"
         type: "boolean"
         acronym: "charging"
-        labels: ["yes","no"]
+        labels: ["on","off"]
       pluggedIn:
         description: "If vehicle is pluggedIn"
         type: "boolean"
         acronym: "pluggedIn"
-        labels: ["yes","no"]
+        labels: ["on","off"]
       doorFrontLeft:
         description: "door fl"
         type: "boolean"
