@@ -28,3 +28,7 @@
 	* fix 0.2.1 error on max and avail distance
 	* fix existing device check
 	* added all doors support
+* 20210206, v0.2.3
+	* edit package Bluelinky version
+* 20210206, v0.2.4
+	* skip zero value for max and remaining distance

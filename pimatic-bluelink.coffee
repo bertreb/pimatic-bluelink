@@ -470,10 +470,12 @@ module.exports = (env) ->
         @emit 'pluggedIn', (evStatus.batteryPlugin > 0)
       if evStatus.reservChargeInfos.targetSOClist?[0]?.dte?.rangeByFuel?.totalAvailableRange?.value?
         _maximumRange = Number evStatus.reservChargeInfos.targetSOClist[0].dte.rangeByFuel.totalAvailableRange.value
-        @setMaximumRange(_maximumRange)
+        if _maximumRange > 0
+          @setMaximumRange(_maximumRange)
       if evStatus.drvDistance?[0]?.rangeByFuel?.totalAvailableRange?.value?
         _remainingRange = Number evStatus.drvDistance[0].rangeByFuel.totalAvailableRange.value
-        @setRemainingRange(_remainingRange)
+        if _remainingRange > 0
+          @setRemainingRange(_remainingRange)
 
     setAirco: (_status) =>
       @_airco = Boolean _status
