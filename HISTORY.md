@@ -22,3 +22,5 @@
 	* fix start options
 * 20210101, v0.2.0
 	* added Hyundai support
+* 20210206, v0.2.1
+	* added remainingRange and maximumRange values 

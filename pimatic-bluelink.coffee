@@ -128,6 +128,16 @@ module.exports = (env) ->
         type: "number"
         acronym: "speed"
         unit: "km/h"
+      remainingRange:
+        description: "Remaining range basing on current battery resp. fuel level"
+        type: "number"
+        acronym: "range"
+        unit: "km"        
+      maximumRange:
+        description: "Maximum range with fully charged battery resp. filled tank"
+        type: "number"
+        acronym: "range"
+        unit: "km"        
       lat:
         description: "The cars latitude"
         type: "number"
@@ -154,11 +164,13 @@ module.exports = (env) ->
       @_airco = laststate?.airco?.value ? false
       @_door = laststate?.door?.value ? false
       @_charging = laststate?.charging?.value ? false
-      @_battery = laststate?.battery?.value
-      @_pluggedIn = laststate?.pluggedIn?.value
-      @_odo = laststate?.odo?.value
-      @_lat = laststate?.lat?.value
-      @_lon = laststate?.lon?.value
+      @_battery = laststate?.battery?.value ? 0
+      @_pluggedIn = laststate?.pluggedIn?.value ? false
+      @_odo = laststate?.odo?.value ? 0
+      @_maximumRange = laststate?.maximumRange?.value ? 0
+      @_remainingRange = laststate?.remainingRange?.value ? 0
+      @_lat = laststate?.lat?.value ? 0
+      @_lon = laststate?.lon?.value ? 0
       retries = 0
       maxRetries = 20
 
@@ -226,6 +238,7 @@ module.exports = (env) ->
         @setAirco(status.airCtrlOn)
       if status.evStatus?
         @setEvStatus(status.evStatus)
+
 
       #update polltime to active if engine is on, charging or airco is on 
       active = (Boolean status.engine) or (Boolean status.evStatus.batteryCharge) or (Boolean status.airCtrlOn)
@@ -341,6 +354,8 @@ module.exports = (env) ->
     getPluggedIn: -> Promise.resolve(@_pluggedIn)
     getOdo: -> Promise.resolve(@_odo)
     getSpeed: -> Promise.resolve(@_speed)
+    getMaximumRange: -> Promise.resolve(@_maximumRange)
+    getRemainingRange: -> Promise.resolve(@_remainingRange)
     getLat: -> Promise.resolve(@_lat)
     getLon: -> Promise.resolve(@_lon)
 
@@ -361,6 +376,14 @@ module.exports = (env) ->
         @currentPollTime = @pollTimePassive
         env.logger.debug "Switching to passive poll, with polltime of " + @pollTimePassive + " ms"
         setTimeout(@getStatus, @pollTimePassive)
+
+    setMaximumRange: (_range) =>
+      @_maximumRange = Number _range
+      @emit 'maximumRange', Number _range
+
+    setRemainingRange: (_range) =>
+      @_remainingRange = Number _range
+      @emit 'remainingRange', Number _range
 
     setEngine: (_status) =>
       @_engine = Boolean _status
@@ -384,6 +407,12 @@ module.exports = (env) ->
       if @_charging
         @_pluggedIn = true
         @emit 'pluggedIn', (evStatus.batteryPlugin > 0)
+      if evStatus.reservChargeInfos.targetSOClist?[0]?.dte?.rangeByFuel?.totalAvailableRange?.value?
+        _targetRange = Number evStatus.reservChargeInfos.targetSOClist[0].dte.rangeByFuel.totalAvailableRange.value
+        @setTargetRange(_targetRange)
+      if evStatus.drvDistance?[0]?.rangeByFuel?.totalAvailableRange?.value?
+        _availableRange = Number evStatus.drvDistance[0].rangeByFuel.totalAvailableRange.value
+        @setAvailableRange(_availableRange)
 
     setAirco: (_status) =>
       @_airco = Boolean _status
