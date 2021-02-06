@@ -67,12 +67,12 @@ module.exports = (env) ->
             for vehicle in vehicles
               carConfig = vehicle.vehicleConfig
               env.logger.info "CarConfig: " + JSON.stringify(carConfig,null,2)
-              _did = (carConfig.nickname).split(' ').join("_").toLowerCase()
-              if _.find(@framework.deviceManager.devicesConfig,(d) => (d.id).indexOf(_did)>=0)
+              _did = (carConfig.nickname).split(' ').join("_")
+              if _.find(@framework.deviceManager.devicesConfig,(d) => d.id is _did)
                 env.logger.info "Device '" + _did + "' already in config"
               else
                 config =
-                  id: (carConfig.nickname).split(' ').join("_")
+                  id: _did #(carConfig.nickname).split(' ').join("_").toLowerCase()
                   name: carConfig.nickname
                   class: @_discoveryClass
                   vin: carConfig.vin
@@ -113,6 +113,36 @@ module.exports = (env) ->
         type: "boolean"
         acronym: "pluggedIn"
         labels: ["yes","no"]
+      doorFrontLeft:
+        description: "door fl"
+        type: "boolean"
+        acronym: "door fl"
+        labels: ["open","closed"]
+      doorFrontRight:
+        description: "door fr"
+        type: "boolean"
+        acronym: "door fr"
+        labels: ["open","closed"]
+      doorBackLeft:
+        description: "door bl"
+        type: "boolean"
+        acronym: "door bl"
+        labels: ["open","closed"]
+      doorBackRight:
+        description: "door br"
+        type: "boolean"
+        acronym: "door br"
+        labels: ["open","closed"]
+      hood:
+        description: "hood"
+        type: "boolean"
+        acronym: "hood"
+        labels: ["open","closed"]
+      trunk:
+        description: "trunk"
+        type: "boolean"
+        acronym: "trunk"
+        labels: ["open","closed"]
       battery:
         description: "The battery level"
         type: "number"
@@ -131,12 +161,12 @@ module.exports = (env) ->
       remainingRange:
         description: "Remaining range basing on current battery resp. fuel level"
         type: "number"
-        acronym: "range"
+        acronym: "remaining"
         unit: "km"        
       maximumRange:
         description: "Maximum range with fully charged battery resp. filled tank"
         type: "number"
-        acronym: "range"
+        acronym: "maximum"
         unit: "km"        
       lat:
         description: "The cars latitude"
@@ -169,6 +199,12 @@ module.exports = (env) ->
       @_odo = laststate?.odo?.value ? 0
       @_maximumRange = laststate?.maximumRange?.value ? 0
       @_remainingRange = laststate?.remainingRange?.value ? 0
+      @_doorFrontLeft = laststate?.doorFrontLeft?.value ? 0
+      @_doorFrontRight = laststate?.doorFrontRight?.value ? 0
+      @_doorBackLeft = laststate?.doorBackLeft?.value ? 0
+      @_doorBackRight = laststate?.doorBackRight?.value ? 0
+      @_hood = laststate?.hood?.value ? 0
+      @_trunk = laststate?.trunk?.value ? 0
       @_lat = laststate?.lat?.value ? 0
       @_lon = laststate?.lon?.value ? 0
       retries = 0
@@ -232,6 +268,8 @@ module.exports = (env) ->
       env.logger.debug "Status: " + JSON.stringify(status,null,2)
       if status.doorLock?
         @setDoor(status.doorLock)
+      if status.doorOpen?
+        @setDoors(status)
       if status.engine?
         @setEngine(status.engine)
       if status.airCtrlOn?
@@ -349,6 +387,12 @@ module.exports = (env) ->
     getEngine: -> Promise.resolve(@_engine)
     getAirco: -> Promise.resolve(@_airco)
     getDoor: -> Promise.resolve(@_door)
+    getDoorFrontLeft: -> Promise.resolve(@_doorFrontLeft)
+    getDoorFrontRight: -> Promise.resolve(@_doorFrontRight)
+    getDoorBackLeft: -> Promise.resolve(@_doorBackLeft)
+    getDoorBackRight: -> Promise.resolve(@_doorBackRight)
+    getHood: -> Promise.resolve(@_hood)
+    getTrunk: -> Promise.resolve(@_trunk)
     getCharging: -> Promise.resolve(@_charging)
     getBattery: -> Promise.resolve(@_battery)
     getPluggedIn: -> Promise.resolve(@_pluggedIn)
@@ -397,6 +441,23 @@ module.exports = (env) ->
       @_door = Boolean _status
       @emit 'door', Boolean _status
 
+    setDoors: (_status) =>
+      if _status.doorOpen?
+        @_doorFrontLeft = Boolean _status.doorOpen.frontLeft
+        @emit 'doorFrontLeft', Boolean _status.doorOpen.frontLeft
+        @_doorFrontRight = Boolean _status.doorOpen.doorFrontRight
+        @emit 'doorFrontRight', Boolean _status.doorOpen.doorFrontRight
+        @_doorBackLeft = Boolean _status.doorOpen.backLeft
+        @emit 'doorBackLeft', Boolean _status.doorOpen.backLeft
+        @_doorBackRight = Boolean _status.doorOpen.backRight
+        @emit 'doorBackRight', Boolean _status.doorOpen.backRight
+      if _status.trunkOpen?
+        @_trunk = Boolean _status.trunkOpen
+        @emit 'trunk', Boolean _status.trunkOpen
+      if _status.hoodOpen?
+        @_hood = Boolean _status.hoodOpen
+        @emit 'hood', Boolean _status.hoodOpen
+
     setEvStatus: (evStatus) =>
       @_battery = Number evStatus.batteryStatus
       @emit 'battery', Number evStatus.batteryStatus
@@ -408,11 +469,11 @@ module.exports = (env) ->
         @_pluggedIn = true
         @emit 'pluggedIn', (evStatus.batteryPlugin > 0)
       if evStatus.reservChargeInfos.targetSOClist?[0]?.dte?.rangeByFuel?.totalAvailableRange?.value?
-        _targetRange = Number evStatus.reservChargeInfos.targetSOClist[0].dte.rangeByFuel.totalAvailableRange.value
-        @setTargetRange(_targetRange)
+        _maximumRange = Number evStatus.reservChargeInfos.targetSOClist[0].dte.rangeByFuel.totalAvailableRange.value
+        @setMaximumRange(_maximumRange)
       if evStatus.drvDistance?[0]?.rangeByFuel?.totalAvailableRange?.value?
-        _availableRange = Number evStatus.drvDistance[0].rangeByFuel.totalAvailableRange.value
-        @setAvailableRange(_availableRange)
+        _remainingRange = Number evStatus.drvDistance[0].rangeByFuel.totalAvailableRange.value
+        @setRemainingRange(_remainingRange)
 
     setAirco: (_status) =>
       @_airco = Boolean _status
@@ -437,7 +498,7 @@ module.exports = (env) ->
 
     destroy:() =>
       clearTimeout(@statusTimer) if @statusTimer?
-      @removeListener('clientReady', @clientListener)
+      @plugin.removeListener('clientReady', @clientListener)
       super()
 
   class BluelinkActionProvider extends env.actions.ActionProvider

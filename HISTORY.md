@@ -23,4 +23,8 @@
 * 20210101, v0.2.0
 	* added Hyundai support
 * 20210206, v0.2.1
-	* added remainingRange and maximumRange values 
+	* added remainingRange and maximumRange values
+* 20210206, v0.2.2
+	* fix 0.2.1 error on max and avail distance
+	* fix existing device check
+	* added all doors support
