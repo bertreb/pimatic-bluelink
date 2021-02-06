@@ -117,32 +117,32 @@ module.exports = (env) ->
         description: "door fl"
         type: "boolean"
         acronym: "door fl"
-        labels: ["open","closed"]
+        labels: ["opened","closed"]
       doorFrontRight:
         description: "door fr"
         type: "boolean"
         acronym: "door fr"
-        labels: ["open","closed"]
+        labels: ["opened","closed"]
       doorBackLeft:
         description: "door bl"
         type: "boolean"
         acronym: "door bl"
-        labels: ["open","closed"]
+        labels: ["opened","closed"]
       doorBackRight:
         description: "door br"
         type: "boolean"
         acronym: "door br"
-        labels: ["open","closed"]
+        labels: ["opened","closed"]
       hood:
         description: "hood"
         type: "boolean"
         acronym: "hood"
-        labels: ["open","closed"]
+        labels: ["opened","closed"]
       trunk:
         description: "trunk"
         type: "boolean"
         acronym: "trunk"
-        labels: ["open","closed"]
+        labels: ["opened","closed"]
       battery:
         description: "The battery level"
         type: "number"

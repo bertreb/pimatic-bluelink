@@ -32,3 +32,5 @@
 	* edit package Bluelinky version
 * 20210206, v0.2.4
 	* skip zero value for max and remaining distance
+* 20210206, v0.2.5
+	* corrected words for localization
