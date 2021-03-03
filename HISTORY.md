@@ -34,3 +34,5 @@
 	* skip zero value for max and remaining distance
 * 20210206, v0.2.6
 	* corrected words for localization
+* 20210303, v0.2.7
+	* update to new kia/hyundai api

@@ -5,7 +5,7 @@ module.exports = (env) ->
   _ = require('lodash')
   fs = require('fs')
   path = require('path')
-  #Bluelinky = require('kuvork')
+  Bluelinky = require('kuvork')
 
   class BluelinkPlugin extends env.plugins.Plugin
     init: (app, @framework, @config) =>
@@ -14,30 +14,32 @@ module.exports = (env) ->
 
       @deviceConfigDef = require("./device-config-schema")
 
-      @brand = @config.brand ? "kia"
-      if @brand is "hyundai"
-        Bluelinky = require('bluelinky')
-        @_discoveryClass = "HuyndaiDevice"
-      else
-        Bluelinky = require('kuvork')
-        @_discoveryClass = "KiaDevice"
-
       @username = @config.username # "email@domain.com";
       @password = @config.password #"a1b2c3d4";
       @region = @config.region ? 'EU'
       @pin = @config.pin
 
+      options = 
+        username: @username
+        password: @password
+        region: @region
+        pin: @pin
+      @brand = @config.brand ? "kia"
+      if @brand is "hyundai"
+        #Bluelinky = require('bluelinky')
+        @_discoveryClass = "HuyndaiDevice"
+        options["brand"] = "H"
+      else
+        #Bluelinky = require('kuvork')
+        @_discoveryClass = "KiaDevice"
+        options["brand"] = "K"
+        options["vin"] = 'KNA' #fo detecting the Kia or Hyandai api, brand deduction: VIN numbers of KIA are KNA/KNC/KNE
+
       @client = null
       @clientReady = false
 
       @framework.on 'after init', ()=>
-        @client = new Bluelinky(
-          username: @username
-          password: @password
-          region: @region
-          pin: @pin
-        )
-
+        @client = new Bluelinky(options)
         @client.on 'ready',() =>
           env.logger.debug "Plugin emit clientReady"
           @clientReady = true
