@@ -36,3 +36,5 @@
 	* corrected words for localization
 * 20210303, v0.2.7
 	* update to new kia/hyundai api
+* 20210303, v0.2.8
+	* fix typo in class name

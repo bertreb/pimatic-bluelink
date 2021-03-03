@@ -27,13 +27,13 @@ module.exports = (env) ->
       @brand = @config.brand ? "kia"
       if @brand is "hyundai"
         #Bluelinky = require('bluelinky')
-        @_discoveryClass = "HuyndaiDevice"
+        @_discoveryClass = "HyundaiDevice"
         options["brand"] = "H"
       else
         #Bluelinky = require('kuvork')
         @_discoveryClass = "KiaDevice"
         options["brand"] = "K"
-        options["vin"] = 'KNA' #fo detecting the Kia or Hyandai api, brand deduction: VIN numbers of KIA are KNA/KNC/KNE
+        options["vin"] = "KNA" #for detecting the Kia or Hyandai api, brand deduction: VIN numbers of KIA are KNA/KNC/KNE
 
       @client = null
       @clientReady = false
