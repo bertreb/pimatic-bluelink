@@ -414,7 +414,7 @@ module.exports = (env) ->
           when "refresh"
             clearTimeout(@statusTimer) if @statusTimer?
             @getStatus()           
-            env.logger.debug "refreshing status: " + JSON.stringify(resp,null,2)
+            env.logger.debug "refreshing status"
             resolve()
           else
             env.logger.debug "Unknown command " + command

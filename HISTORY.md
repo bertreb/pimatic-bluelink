@@ -46,3 +46,5 @@
 	* fix handling button action
 * 20210304, v0.2.12
 	* fix refreshButton
+* 20210304, v0.2.13
+	* fix refreshButton
