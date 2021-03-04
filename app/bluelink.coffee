@@ -35,8 +35,8 @@ $(document).on 'templateinit', (event) ->
     modeStartCharge: -> @changeActionTo "startCharge"
     modeStopCharge: -> @changeActionTo "stopCharge"
     modeRefresh: -> 
-      @changeActionTo "stopCharge"
-      .then -> @updateRefreshButton()
+      @changeActionTo "refresh"
+      .then => @updateRefreshButton()
 
     updateAircoButtons: =>
       aircoAttr = @getAttribute('airco')?.value()

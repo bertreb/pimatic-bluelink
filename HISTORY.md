@@ -44,3 +44,5 @@
 	* added buttons to control airco, doors, charging and refresh
 * 20210304, v0.2.11
 	* fix handling button action
+* 20210304, v0.2.12
+	* fix refreshButton
