@@ -39,6 +39,12 @@ module.exports = (env) ->
       @clientReady = false
 
       @framework.on 'after init', ()=>
+        mobileFrontend = @framework.pluginManager.getPlugin 'mobile-frontend'
+        if mobileFrontend?
+          mobileFrontend.registerAssetFile 'js',   "pimatic-bluelink/app/bluelink.coffee"
+          mobileFrontend.registerAssetFile 'html', "pimatic-bluelink/app/bluelink.jade"
+          mobileFrontend.registerAssetFile 'css',  "pimatic-bluelink/app/bluelink.css"
+
         @client = new Bluelinky(options)
         @client.on 'ready',() =>
           env.logger.debug "Plugin emit clientReady"
@@ -48,6 +54,7 @@ module.exports = (env) ->
         @client.on 'error',(err) =>
           env.logger.debug "Bluelink login error: " + JSON.stringify(err,null,2)
           @clientReady = false
+
 
 
       @framework.deviceManager.registerDeviceClass('KiaDevice', {
@@ -91,27 +98,39 @@ module.exports = (env) ->
 
   class BluelinkDevice extends env.devices.Device
 
+    template: "bluelink"
+
+    actions:
+      changeActionTo:
+        description: "Sets the action"
+        params:
+          action:
+            type: "string"
     attributes:
       engine:
         description: "Status of engine"
         type: "boolean"
         acronym: "engine"
         labels: ["on","off"]
+        hidden: false
       airco:
         description: "Status of airco"
         type: "boolean"
         acronym: "airco"
         labels: ["on","off"]
+        hidden: true
       door:
         description: "Status of doorlock"
         type: "boolean"
         acronym: "door"
         labels: ["locked","unlocked"]
+        hidden: true
       charging:
         description: "If vehicle is charging"
         type: "boolean"
         acronym: "charging"
         labels: ["on","off"]
+        hidden: true
       pluggedIn:
         description: "If vehicle is pluggedIn"
         type: "boolean"
@@ -181,6 +200,8 @@ module.exports = (env) ->
         type: "number"
         acronym: "lon"
 
+
+    getTemplateName: -> "bluelink"
     
     constructor: (config, lastState, @plugin, client, @framework) ->
       @config = config
@@ -192,6 +213,10 @@ module.exports = (env) ->
       @pollTimePassive = @config.pollTimePassive ? 3600000 # 1 hour
       @pollTimeActive = @config.pollTimeActive ? 600000 # 10 minutes
       @currentPollTime = @pollTimeActive
+
+      @_defrost = @config.defrost ? false
+      @_windscreenHeating = @config.windscreenHeating ? false
+      @_temperature = @config.temperature ? 20
 
       @_engine = laststate?.engine?.value ? false
       @_speed = laststate?.speed?.value ? 0
@@ -289,9 +314,9 @@ module.exports = (env) ->
 
     parseOptions: (_options) ->
       climateOptions =
-        defrost: false
-        windscreenHeating: false
-        temperature: 20
+        defrost: @_defrost
+        windscreenHeating: @_windscreenHeating
+        temperature: @_temperature
         unit: 'C'
       if _options?
         try
@@ -315,8 +340,17 @@ module.exports = (env) ->
 
       return climateOptions
 
+
+    changeActionTo: (action) =>
+
+      options = @parseOptions()
+      return @execute(action, options)
+
+
     execute: (command, options) =>
       return new Promise((resolve,reject) =>
+
+        unless @vehicle? then return reject("No active vehicle")
 
         switch command
           when "start"

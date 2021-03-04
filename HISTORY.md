@@ -40,3 +40,5 @@
 	* fix typo in class name
 * 20210304, v0.2.9
 	* added Hyundai to rules classes
+* 20210304, v0.2.10
+	* added buttons to control airco, doors, charging and refresh
