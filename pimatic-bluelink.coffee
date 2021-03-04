@@ -344,7 +344,7 @@ module.exports = (env) ->
     changeActionTo: (action) =>
 
       options = @parseOptions()
-      return @execute(action, options)
+      return @execute(action, JSON.stringify(options))
 
 
     execute: (command, options) =>

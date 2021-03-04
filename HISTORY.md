@@ -42,3 +42,5 @@
 	* added Hyundai to rules classes
 * 20210304, v0.2.10
 	* added buttons to control airco, doors, charging and refresh
+* 20210304, v0.2.11
+	* fix handling button action
