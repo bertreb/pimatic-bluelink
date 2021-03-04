@@ -38,3 +38,5 @@
 	* update to new kia/hyundai api
 * 20210303, v0.2.8
 	* fix typo in class name
+* 20210304, v0.2.9
+	* added Hyundai to rules classes

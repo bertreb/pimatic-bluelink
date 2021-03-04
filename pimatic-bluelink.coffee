@@ -515,9 +515,10 @@ module.exports = (env) ->
 
       bluelinkDevice = null
       @options = null
+      supportedCarClasses = ["KiaDevice","HyundaiDevice"]
   
       bluelinkDevices = _(@framework.deviceManager.devices).values().filter(
-        (device) => device.config.class == "KiaDevice"
+        (device) => device.config.class in supportedCarClasses
       ).value()
 
       setCommand = (command) =>
