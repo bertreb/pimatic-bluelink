@@ -43,10 +43,10 @@ The following attributes are updated and visible in the Gui.
 
 ```
 Buttons:
- airco | aico+ | off   "Status of airco (default values), airco+ (optionsVariable values) or off"
- lock | unlocked       "Doors are locked or unlocked"
- charge | stop         "Vehicle is charging"
- refresh               "refresh the car status"
+ airco | aico+ | off   "Set airco (default values), airco+ (optionsVariable values) or off"
+ lock | unlocked       "Locked or unlocked the doors"
+ charge | stop         "Charge or stop charging Vehicle"
+ refresh               "Refresh the car status"
 ```
 
 ```
