@@ -48,3 +48,5 @@
 	* fix refreshButton
 * 20210304, v0.2.13
 	* fix refreshButton
+* 20210305, v0.2.14
+	* added airco+ button

@@ -4,6 +4,7 @@ script#bluelink-template(type='text/template')
     div.button.button-control.ui-controlgroup.ui-controlgroup-horizontal.ui-corner-all.ui-mini.no-carousel-slide(data-role='controlgroup', data-type='horizontal', data-mini='true', data-enhanced='true')
       .ui-controlgroup-controls
         a.ui-first-child.ui-btn.ui-corner-all(name='startAircoButton', data-bind='click: modeStartAirco')=__("airco")
+        a.ui-btn.ui-corner-all(name='startAircoPlusButton', data-bind='click: modeStartAircoPlus')=__("airco+")    
         a.ui-last-child.ui-btn.ui-corner-all(name='offAircoButton', data-bind='click: modeOffAirco')=__("off")
         div.ui-smallspacer
       .ui-controlgroup-controls

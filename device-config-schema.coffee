@@ -26,6 +26,10 @@ module.exports = {
         description: "Target car temperature (C), when remote starting the airco"
         type: "number"
         default: 20
+      optionsVariable:
+        description: "Options variable name (without $) when starting airco+"
+        type: "string"
+        default: ""
       pollTimePassive:
         description: "The polltime in ms between status polls in passive mode (1 hour)"
         type: "number"
@@ -62,6 +66,10 @@ module.exports = {
         description: "Target car temperature (C), when remote starting the airco"
         type: "number"
         default: 20
+      optionsVariable:
+        description: "Options variable name (without $) when starting airco+"
+        type: "string"
+        default: ""
       pollTimePassive:
         description: "The polltime in ms between status polls in passive mode (1 hour)"
         type: "number"

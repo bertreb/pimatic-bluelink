@@ -14,6 +14,7 @@ $(document).on 'templateinit', (event) ->
       super(elements)
       
       @startAircoButton = $(elements).find('[name=startAircoButton]')
+      @startAircoPlusButton = $(elements).find('[name=startAircoPlusButton]')
       @offAircoButton = $(elements).find('[name=offAircoButton]')
       @lockButton = $(elements).find('[name=lockButton]')
       @unlockButton = $(elements).find('[name=unlockButton]')
@@ -29,6 +30,7 @@ $(document).on 'templateinit', (event) ->
       @getAttribute('charging')?.value.subscribe( => @updateChargingButtons() )
 
     modeStartAirco: -> @changeActionTo "start"
+    modeStartAircoPlus: -> @changeActionTo "startPlus"
     modeOffAirco: -> @changeActionTo "stop"
     modeLock: -> @changeActionTo "lock"
     modeUnlock: -> @changeActionTo "unlock"
@@ -41,14 +43,21 @@ $(document).on 'templateinit', (event) ->
     updateAircoButtons: =>
       aircoAttr = @getAttribute('airco')?.value()
       switch aircoAttr
-        when true
+        when "start"
           @startAircoButton.addClass('ui-btn-active')
+          @startAircoPlusButton.removeClass('ui-btn-active')
           @offAircoButton.removeClass('ui-btn-active')
-        when false
+        when "startPlus"
           @startAircoButton.removeClass('ui-btn-active')
+          @startAircoPlusButton.addClass('ui-btn-active')
+          @offAircoButton.removeClass('ui-btn-active')
+        when "off"
+          @startAircoButton.removeClass('ui-btn-active')
+          @startAircoPlusButton.removeClass('ui-btn-active')
           @offAircoButton.addClass('ui-btn-active')
         else
           @startAircoButton.removeClass('ui-btn-active')
+          @startAircoPlusButton.removeClass('ui-btn-active')
           @offAircoButton.removeClass('ui-btn-active')
       return
 

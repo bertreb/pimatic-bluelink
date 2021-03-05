@@ -115,9 +115,9 @@ module.exports = (env) ->
         hidden: false
       airco:
         description: "Status of airco"
-        type: "boolean"
+        type: "string"
         acronym: "airco"
-        labels: ["on","off"]
+        enum: ["start","startPlus","off"]
         hidden: true
       door:
         description: "Status of doorlock"
@@ -217,10 +217,11 @@ module.exports = (env) ->
       @_defrost = @config.defrost ? false
       @_windscreenHeating = @config.windscreenHeating ? false
       @_temperature = @config.temperature ? 20
+      @_optionsVariable = @config.optionsVariable ? ""
 
       @_engine = laststate?.engine?.value ? false
       @_speed = laststate?.speed?.value ? 0
-      @_airco = laststate?.airco?.value ? false
+      @_airco = laststate?.airco?.value ? "off"
       @_door = laststate?.door?.value ? false
       @_charging = laststate?.charging?.value ? false
       @_battery = laststate?.battery?.value ? 0
@@ -343,7 +344,17 @@ module.exports = (env) ->
 
     changeActionTo: (action) =>
 
-      options = @parseOptions()
+      if action is "startPlus"
+        if @_optionsVariable isnt ""
+          _optionsString = @framework.variableManager.getVariableValue(@_optionsVariable)
+          if _optionsString?
+            options = @parseOptions(_optionsString)
+          else
+            return Promise.reject("optionsVariable '#{@_optionsVariable}' does not exsist")
+        else
+          return Promise.reject("No optionsVariable defined")
+      else
+        options = @parseOptions()
       return @execute(action, JSON.stringify(options))
 
 
@@ -516,8 +527,8 @@ module.exports = (env) ->
           @setRemainingRange(_remainingRange)
 
     setAirco: (_status) =>
-      @_airco = Boolean _status
-      @emit 'airco', Boolean _status
+      @_airco = _status
+      @emit 'airco', _status
 
     setOdo: (_status) =>
       @_odo = Number _status
