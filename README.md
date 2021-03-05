@@ -69,7 +69,7 @@ The car can be controlled via rules
 
 The action syntax:
 ```
-  bluelink <KiaDevice/Hyundai Id> [start $startOptionsVariable | startDefault | stop |
+  bluelink <Kia/Hyundai DeviceId> [start $startOptionsVariable | startDefault | stop |
       lock | unlock | chargeStart | chargeStop | refresh ]
 ```
 Commands:
