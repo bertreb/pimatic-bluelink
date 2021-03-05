@@ -50,3 +50,5 @@
 	* fix refreshButton
 * 20210305, v0.2.15
 	* added airco+ button
+* 20210305, v0.2.16
+	* fixed startPlus
