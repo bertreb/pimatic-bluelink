@@ -16,7 +16,8 @@
     "HISTORY.md",
     "app/bluelink.coffee",
     "app/bluelink.css",
-    "app/bluelink.jade"
+    "app/bluelink.jade",
+    "assets"
   ],
   "homepage": "https://github.com/bertreb/pimatic-bluelink.git",
   "keywords": [

@@ -35,21 +35,34 @@ There are 2 timers, pollTimePassive and pollTimeAtive. The polling switches to p
   pollTimeActive:  "The time between status poll in active mode (default 600000 ms (is 10 minutes))"
 }
 ```
+## The gui
+![](/assets/bluelink.png)
 
 The following attributes are updated and visible in the Gui.
 
 ```
-engine: "Status of engine (on/off)"
-airco: "Status of airco (on/off)"
-door: "Status of car door (lock/unlocked)"
-charging: "If vehicle is charging"
-pluggedIn: "If vehicle is pluggedIn"
-battery: "The battery level (0-100%)"
-odo: "The car odo value (km)"
-speed: "The car speed (km/h)"
-lat: "The cars latitude"
-lon: "The cars longitude"
+Buttons:
+ airco | aico+ | off   -> "Status of airco (default values), airco+ (optionsVariable values) or off"
+ lock | unlocked       -> "If the doors are locked or unlocked"
+ charge | stop         -> "If vehicle is charging"
+ refresh               -> "refresh the car status"
 ```
+
+```
+Attributes:
+ engine: "Status of engine (on/off)"
+ doors: "Status of car doors (open/closed)"
+ pluggedIn: "If vehicle is pluggedIn"
+ battery: "The battery level (0-100%)"
+ odo: "The car odo value (km)"
+ speed: "The car speed (km/h)"
+ remaining: "The remaining distance (km)"
+ maximum: "The maximum distance if fully loaded (km)"
+ lat: "The cars latitude"
+ lon: "The cars longitude"
+```
+
+## Rules
 
 The car can be controlled via rules
 
@@ -81,7 +94,6 @@ An example: $startOptionsVariable:
 ```
 (use the double quotes when you add the expression in the startOptionsVariable)
 
-The HyundaiDevice is still in alfa test. You are welcome to test it.
 
 ----
 This plugin needs minimal node version 10!
