@@ -199,9 +199,22 @@ module.exports = (env) ->
         description: "The cars longitude"
         type: "number"
         acronym: "lon"
+      connection:
+        description: "The connection status"
+        type: "string"
+        acronym: "status"
 
 
     getTemplateName: -> "bluelink"
+
+    statusCodes =
+      init: 0
+      ready: 1
+      getStatus: 2
+      getStatusError: 3 
+      commandSend: 4
+      commandSuccess: 5
+      commanderror: 6
     
     constructor: (config, lastState, @plugin, client, @framework) ->
       @config = config
@@ -237,6 +250,8 @@ module.exports = (env) ->
       @_trunk = laststate?.trunk?.value ? 0
       @_lat = laststate?.lat?.value ? 0
       @_lon = laststate?.lon?.value ? 0
+      @_connection = statusCodes.init
+      @setConnection(statusCodes.init)
       retries = 0
       maxRetries = 20
 
@@ -247,6 +262,7 @@ module.exports = (env) ->
           env.logger.debug "Plugin ClientReady, requesting vehicle"
           @vehicle = @plugin.client.getVehicle(@config.vin)
           env.logger.debug "From plugin start - starting status update cyle"
+          @setConnection(statusCodes.ready)
           @getStatus()
         else
           env.logger.debug "Error: plugin start but @statusTimer alredy running!"
@@ -257,11 +273,13 @@ module.exports = (env) ->
           env.logger.debug "ClientReady ready, Device starting, requesting vehicle"
           @vehicle = @plugin.client.getVehicle(@config.vin)
           env.logger.debug "From device start - starting status update cyle"
+          @setConnection(statusCodes.ready)
           @getStatus()
 
       @getStatus = () =>
         if @plugin.clientReady
           env.logger.debug "requesting status"
+          @setConnection(statusCodes.getStatus)
           @vehicle.status()
           .then (status)=>
             @handleStatus(status)
@@ -273,7 +291,9 @@ module.exports = (env) ->
           .then (odometer) =>
             env.logger.debug "odo " + JSON.stringify(odometer,null,2)
             @handleOdo(odometer)
+            @setConnection(statusCodes.ready)
           .catch (e) =>
+            @setConnection(statusCodes.getStatusError)
             env.logger.debug "getStatus error: " + JSON.stringify(e,null,2)
           @statusTimer = setTimeout(@getStatus, @currentPollTime)
           env.logger.debug "Next poll in " + @currentPollTime + " ms"
@@ -309,7 +329,6 @@ module.exports = (env) ->
           @setAirco("off")
       if status.evStatus?
         @setEvStatus(status.evStatus)
-
 
       #update polltime to active if engine is on, charging or airco is on 
       active = (Boolean status.engine) or (Boolean status.evStatus.batteryCharge) or (Boolean status.airCtrlOn)
@@ -368,6 +387,7 @@ module.exports = (env) ->
 
         unless @vehicle? then return reject("No active vehicle")
 
+        @setConnection(statusCodes.commandSend, command)
         switch command
           when "start"
             env.logger.debug "Start with options: " + JSON.stringify(@parseOptions(options),null,2)
@@ -376,8 +396,10 @@ module.exports = (env) ->
               env.logger.debug "Started: " + JSON.stringify(resp,null,2)
               @setEngine(true)
               @setPollTime(true) # set to active poll
+              @setConnection(statusCodes.commandSuccess, command)
               resolve()
             .catch (err) =>
+              @setConnection(statusCodes.commandError, command)
               env.logger.debug "Error start car: " + JSON.stringify(err,null,2)
               reject()
           when "stop"
@@ -385,8 +407,10 @@ module.exports = (env) ->
             .then (resp)=>
               @setEngine(false)
               env.logger.debug "Stopped: " + JSON.stringify(resp,null,2)
+              @setConnection(statusCodes.commandSuccess, command)
               resolve()
             .catch (err) =>
+              @setConnection(statusCodes.commandError, command)
               env.logger.debug "Error stop car: " + JSON.stringify(err,null,2)
               reject()
           when "lock"
@@ -394,8 +418,10 @@ module.exports = (env) ->
             .then (resp)=>
               @setDoor(true)
               env.logger.debug "Locked: " + JSON.stringify(resp,null,2)
+              @setConnection(statusCodes.commandSuccess, command)
               resolve()
             .catch (err) =>
+              @setConnection(statusCodes.commandError, command)
               env.logger.debug "Error lock car: " + JSON.stringify(err,null,2)
               reject()
           when "unlock"
@@ -404,8 +430,10 @@ module.exports = (env) ->
               @setDoor(false)
               @setPollTime(true) # set to active poll
               env.logger.debug "Unlocked: " + JSON.stringify(resp,null,2)
+              @setConnection(statusCodes.commandSuccess, command)
               resolve()
             .catch (err) =>
+              @setConnection(statusCodes.commandError, command)
               env.logger.debug "Error unlock car: " + JSON.stringify(err,null,2)
               reject()
           when "startCharge"
@@ -414,8 +442,10 @@ module.exports = (env) ->
               @setCharge(true)
               @setPollTime(true) # set to active poll
               env.logger.debug "startCharge: " + JSON.stringify(resp,null,2)
+              @setConnection(statusCodes.commandSuccess, command)
               resolve()
             .catch (err) =>
+              @setConnection(statusCodes.commandError, command)
               env.logger.debug "Error startCharge car: " + JSON.stringify(err,null,2)
               reject()
           when "stopCharge"
@@ -423,16 +453,20 @@ module.exports = (env) ->
             .then (resp)=>
               @setCharge(false)
               env.logger.debug "stopCharge: " + JSON.stringify(resp,null,2)
+              @setConnection(statusCodes.commandSuccess, command)
               resolve()
             .catch (err) =>
+              @setConnection(statusCodes.commandError, command)
               env.logger.debug "Error stopCharge car: " + JSON.stringify(err,null,2)
               reject()
           when "refresh"
             clearTimeout(@statusTimer) if @statusTimer?
-            @getStatus()           
+            @setConnection()           
             env.logger.debug "refreshing status"
+            @setConnection(statusCodes.commandSuccess, command)
             resolve()
           else
+            @setConnection(statusCodes.commandError, command)
             env.logger.debug "Unknown command " + command
             reject()
         resolve()
@@ -456,6 +490,33 @@ module.exports = (env) ->
     getRemainingRange: -> Promise.resolve(@_remainingRange)
     getLat: -> Promise.resolve(@_lat)
     getLon: -> Promise.resolve(@_lon)
+    getConnection: -> Promise.resolve(@_connection)
+
+
+    setConnection: (status, command)=>
+      switch status
+        when statusCodes.init
+          _status = "initializing"
+        when statusCodes.ready
+          _status = "ready"
+        when statusCodes.getStatus
+          _status = "get status"
+        when statusCodes.getStatusError
+          _status = "get status error"
+        when statusCodes.commandSend
+          _status = "execute " + command
+        when statusCodes.commandSuccess
+          _status = command + " executed"
+          setTimeout(=> 
+            @setConnection(statusCodes.ready)
+          ,3000)
+        when statusCodes.commandError
+          _status = command + " error"
+        else
+          _status = "unknown status " + status
+
+      @_connection = _status
+      @emit 'connection', _status
 
     setPollTime: (active) =>
       # true is active, false is passive
