@@ -303,7 +303,10 @@ module.exports = (env) ->
       if status.engine?
         @setEngine(status.engine)
       if status.airCtrlOn?
-        @setAirco(status.airCtrlOn)
+        if status.airCtrlOn
+          @setAirco("start")
+        else
+          @setAirco("off")
       if status.evStatus?
         @setEvStatus(status.evStatus)
 
