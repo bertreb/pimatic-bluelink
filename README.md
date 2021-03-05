@@ -4,7 +4,7 @@ Plugin for Bluelink connected cars
 The plugin can be installed via the plugins page of Pimatic.
 This plugin works for Kia and Hyundia bluelink connected cars.
 
-## Config of the plugin
+### Config of the plugin
 ```
 {
   username:  "The username of your Kia / Hyundai account"
@@ -16,7 +16,7 @@ This plugin works for Kia and Hyundia bluelink connected cars.
 }
 ```
 
-## Config of a KiaDevice or HyundaiDevice
+### Config of a KiaDevice or HyundaiDevice
 
 Devices are added via the discovery function. Per registered Kia a KiaDevice or per registered Hyundai a HyundaiDevice is discovered unless the device is already in the config.
 The automatic generated Id must not change. Its the unique reference to your car. You can change the Pimatic device name after you have saved the device. For the Pimatic KiaDevice ID and Name the Kia Nickname is used. The vin and attributes are generated automaticaly and should not be changed.
@@ -31,11 +31,12 @@ There are 2 timers, pollTimePassive and pollTimeAtive. The polling switches to p
   defrost: "default value for remote start"
   windscreenHeating: "default value for remote start"
   temperature: "default value for remote start"
+  optionsVariable: "variable name for the airo+ options"
   pollTimePassive: "The time between status poll in passive mode (default 3600000 ms (is 1 hour))"
   pollTimeActive:  "The time between status poll in active mode (default 600000 ms (is 10 minutes))"
 }
 ```
-## The gui
+### The gui
 ![](/assets/bluelink.png)
 
 The following attributes are updated and visible in the Gui.
@@ -62,7 +63,7 @@ Attributes:
  lon: "The cars longitude"
 ```
 
-## Rules
+### Rules
 
 The car can be controlled via rules
 
@@ -96,4 +97,4 @@ An example: $startOptionsVariable:
 
 
 ----
-This plugin needs minimal node version 10!
+This plugin needs node version 10!
