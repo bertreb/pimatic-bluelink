@@ -54,3 +54,5 @@
 	* fixed startPlus
 * 20210305, v0.2.17
 	* added status info
+* 20210305, v0.2.18
+	* update to newest Kuvork lib
