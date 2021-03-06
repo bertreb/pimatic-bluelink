@@ -56,3 +56,5 @@
 	* added status info
 * 20210305, v0.2.18
 	* update to newest Kuvork lib
+* 20210305, v0.2.19
+	* fix refresh status

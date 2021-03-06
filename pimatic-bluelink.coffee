@@ -461,7 +461,7 @@ module.exports = (env) ->
               reject()
           when "refresh"
             clearTimeout(@statusTimer) if @statusTimer?
-            @setConnection()           
+            @getStatus()           
             env.logger.debug "refreshing status"
             @setConnection(statusCodes.commandSuccess, command)
             resolve()
