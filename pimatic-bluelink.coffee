@@ -367,18 +367,17 @@ module.exports = (env) ->
     changeActionTo: (action) =>
 
       _action = action
+      options = null
       if action is "startPlus"
         if @_optionsVariable isnt ""
           _optionsString = @framework.variableManager.getVariableValue(@_optionsVariable)
           if _optionsString?
-            options = @parseOptions(_optionsString)
+            options = _optionsString
           else
             return Promise.reject("optionsVariable '#{@_optionsVariable}' does not exsist")
         else
           return Promise.reject("No optionsVariable defined")
-      else
-        options = @parseOptions()
-      return @execute(_action, JSON.stringify(options))
+      return @execute(_action, options)
 
 
     execute: (command, options) =>
