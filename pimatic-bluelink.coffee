@@ -372,7 +372,6 @@ module.exports = (env) ->
           _optionsString = @framework.variableManager.getVariableValue(@_optionsVariable)
           if _optionsString?
             options = @parseOptions(_optionsString)
-            _action = "start"
           else
             return Promise.reject("optionsVariable '#{@_optionsVariable}' does not exsist")
         else
@@ -395,6 +394,21 @@ module.exports = (env) ->
             .then (resp)=>
               env.logger.debug "Started: " + JSON.stringify(resp,null,2)
               @setEngine(true)
+              @setAirco("start")
+              @setPollTime(true) # set to active poll
+              @setConnection(statusCodes.commandSuccess, command)
+              resolve()
+            .catch (err) =>
+              @setConnection(statusCodes.commandError, command)
+              env.logger.debug "Error start car: " + JSON.stringify(err,null,2)
+              reject()
+          when "startPlus"
+            env.logger.debug "StartPlus with options: " + JSON.stringify(@parseOptions(options),null,2)
+            @vehicle.start(@parseOptions(options))
+            .then (resp)=>
+              env.logger.debug "Started: " + JSON.stringify(resp,null,2)
+              @setEngine(true)
+              @setAirco("startPlus")
               @setPollTime(true) # set to active poll
               @setConnection(statusCodes.commandSuccess, command)
               resolve()
@@ -406,6 +420,7 @@ module.exports = (env) ->
             @vehicle.stop()
             .then (resp)=>
               @setEngine(false)
+              @setAirco("off")
               env.logger.debug "Stopped: " + JSON.stringify(resp,null,2)
               @setConnection(statusCodes.commandSuccess, command)
               resolve()
@@ -661,6 +676,12 @@ module.exports = (env) ->
           ((m) =>
             return m.match(' start ')
               .matchVariable(optionsString)
+          ),
+          ((m) =>
+            return m.match(' startPlus', (m) =>
+              setCommand('startPlus')
+              match = m.getFullMatch()
+            )
           ),
           ((m) =>
             return m.match(' stop', (m) =>
