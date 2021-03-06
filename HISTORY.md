@@ -60,3 +60,5 @@
 	* fix refresh status
 * 20210305, v0.2.21
 	* edit startPlus
+* 20210305, v0.2.22
+	* edit startPlus and engine
