@@ -174,7 +174,7 @@ module.exports = (env) ->
       twelveVoltBattery:
         description: "The 12 volt battery level"
         type: "number"
-        unit: ''
+        unit: '%'
         acronym: "12V"
       odo:
         description: "The car odo value"
@@ -580,8 +580,8 @@ module.exports = (env) ->
       @emit 'door', Boolean _status
 
     settwelveVoltBattery: (_status) =>
-      @_twelveVoltBattery = _status
-      @emit 'twelveVoltBattery', _status
+      @_twelveVoltBattery = Math.round (_status / 2.55 )
+      @emit 'twelveVoltBattery', Math.round (_status / 2.55 )
 
     setDoors: (_status) =>
       if _status.doorOpen?

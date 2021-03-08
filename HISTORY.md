@@ -62,5 +62,5 @@
 	* edit startPlus
 * 20210305, v0.2.22
 	* edit startPlus and engine
-* 20210308, v0.2.23
+* 20210308, v0.2.24
 	* add 12V battery status
