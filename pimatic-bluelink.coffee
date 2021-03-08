@@ -171,6 +171,11 @@ module.exports = (env) ->
         type: "number"
         unit: '%'
         acronym: "battery"
+      twelveVoltBattery:
+        description: "The 12 volt battery level"
+        type: "number"
+        unit: ''
+        acronym: "12V"
       odo:
         description: "The car odo value"
         type: "number"
@@ -238,6 +243,7 @@ module.exports = (env) ->
       @_door = laststate?.door?.value ? false
       @_charging = laststate?.charging?.value ? false
       @_battery = laststate?.battery?.value ? 0
+      @_twelveVoltBattery = laststate?.twelveVoltBattery?.value ? 0
       @_pluggedIn = laststate?.pluggedIn?.value ? false
       @_odo = laststate?.odo?.value ? 0
       @_maximumRange = laststate?.maximumRange?.value ? 0
@@ -294,7 +300,7 @@ module.exports = (env) ->
             @setStatus(statusCodes.ready)
           .catch (e) =>
             @setStatus(statusCodes.getStatusError)
-            env.logger.debug "getStatus error: " + JSON.stringify(e,null,2)
+            env.logger.debug "getStatus error: " + JSON.stringify(e.body,null,2)
           @statusTimer = setTimeout(@getCarStatus, @currentPollTime)
           env.logger.debug "Next poll in " + @currentPollTime + " ms"
         else
@@ -327,6 +333,8 @@ module.exports = (env) ->
           @setAirco("start")
         else
           @setAirco("off")
+      if status.battery?.batSoc?
+        @settwelveVoltBattery(status.battery.batSoc)
       if status.evStatus?
         @setEvStatus(status.evStatus)
 
@@ -497,6 +505,7 @@ module.exports = (env) ->
     getTrunk: -> Promise.resolve(@_trunk)
     getCharging: -> Promise.resolve(@_charging)
     getBattery: -> Promise.resolve(@_battery)
+    getTwelveVoltBattery: -> Promise.resolve(@_twelveVoltBattery)
     getPluggedIn: -> Promise.resolve(@_pluggedIn)
     getOdo: -> Promise.resolve(@_odo)
     getSpeed: -> Promise.resolve(@_speed)
@@ -569,6 +578,10 @@ module.exports = (env) ->
     setDoor: (_status) =>
       @_door = Boolean _status
       @emit 'door', Boolean _status
+
+    settwelveVoltBattery: (_status) =>
+      @_twelveVoltBattery = _status
+      @emit 'twelveVoltBattery', _status
 
     setDoors: (_status) =>
       if _status.doorOpen?
