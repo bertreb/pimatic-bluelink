@@ -301,6 +301,7 @@ module.exports = (env) ->
           .catch (e) =>
             @setStatus(statusCodes.getStatusError)
             env.logger.debug "getStatus error: " + JSON.stringify(e.body,null,2)
+          clearTimeout(@statusTimer) if @statusTimer?
           @statusTimer = setTimeout(@getCarStatus, @currentPollTime)
           env.logger.debug "Next poll in " + @currentPollTime + " ms"
         else
@@ -550,14 +551,14 @@ module.exports = (env) ->
         clearTimeout(@statusTimer) if @statusTimer?
         @currentPollTime = @pollTimeActive
         env.logger.debug "Switching to active poll, with polltime of " + @pollTimeActive + " ms"
-        setTimeout(@getCarStatus, @pollTimeActive)
+        @statusTimer = setTimeout(@getCarStatus, @pollTimeActive)
         return
 
       if not active and @currentPollTime == @pollTimeActive
         clearTimeout(@statusTimer) if @statusTimer?
         @currentPollTime = @pollTimePassive
         env.logger.debug "Switching to passive poll, with polltime of " + @pollTimePassive + " ms"
-        setTimeout(@getCarStatus, @pollTimePassive)
+        @statusTimer = setTimeout(@getCarStatus, @pollTimePassive)
 
     setMaximumRange: (_range) =>
       @_maximumRange = Number _range

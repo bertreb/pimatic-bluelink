@@ -66,3 +66,5 @@
 	* add 12V battery status
 * 20210315, v0.2.25
 	* refresh now querying the car
+* 20210315, v0.2.26
+	* edit statusTimer
