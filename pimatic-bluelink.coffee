@@ -269,7 +269,7 @@ module.exports = (env) ->
           @vehicle = @plugin.client.getVehicle(@config.vin)
           env.logger.debug "From plugin start - starting status update cyle"
           @setStatus(statusCodes.ready)
-          @getCarStatus()
+          @getCarStatus(true) # actual car status on start
         else
           env.logger.debug "Error: plugin start but @statusTimer alredy running!"
 
@@ -280,13 +280,13 @@ module.exports = (env) ->
           @vehicle = @plugin.client.getVehicle(@config.vin)
           env.logger.debug "From device start - starting status update cyle"
           @setStatus(statusCodes.ready)
-          @getCarStatus()
+          @getCarStatus(true) # actual car status on start
 
-      @getCarStatus = () =>
+      @getCarStatus = (ref=false) =>
         if @plugin.clientReady
           env.logger.debug "requesting status"
           @setStatus(statusCodes.getStatus)
-          @vehicle.status()
+          @vehicle.status({refresh:ref})
           .then (status)=>
             @handleStatus(status)
             return @vehicle.location()
@@ -334,7 +334,7 @@ module.exports = (env) ->
         else
           @setAirco("off")
       if status.battery?.batSoc?
-        @settwelveVoltBattery(status.battery.batSoc)
+        @setTwelveVoltBattery(status.battery.batSoc)
       if status.evStatus?
         @setEvStatus(status.evStatus)
 
@@ -483,7 +483,7 @@ module.exports = (env) ->
               reject()
           when "refresh"
             clearTimeout(@statusTimer) if @statusTimer?
-            @getCarStatus()           
+            @getCarStatus(true)           
             env.logger.debug "refreshing status"
             @setStatus(statusCodes.commandSuccess, command)
             resolve()
@@ -579,7 +579,7 @@ module.exports = (env) ->
       @_door = Boolean _status
       @emit 'door', Boolean _status
 
-    settwelveVoltBattery: (_status) =>
+    setTwelveVoltBattery: (_status) =>
       @_twelveVoltBattery = Math.round (_status / 2.55 )
       @emit 'twelveVoltBattery', Math.round (_status / 2.55 )
 

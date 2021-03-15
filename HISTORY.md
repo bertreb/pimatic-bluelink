@@ -64,3 +64,5 @@
 	* edit startPlus and engine
 * 20210308, v0.2.24
 	* add 12V battery status
+* 20210315, v0.2.25
+	* refresh now querying the car
