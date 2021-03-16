@@ -282,11 +282,12 @@ module.exports = (env) ->
           @setStatus(statusCodes.ready)
           @getCarStatus(true) # actual car status on start
 
-      @getCarStatus = (ref=false) =>
+      @getCarStatus = (_refresh=false) =>
         if @plugin.clientReady
-          env.logger.debug "requesting status"
+          clearTimeout(@statusTimer) if @statusTimer?
+          env.logger.debug "requesting status, refresh: " + _refresh
           @setStatus(statusCodes.getStatus)
-          @vehicle.status({refresh:ref})
+          @vehicle.status({refresh:_refresh})
           .then (status)=>
             @handleStatus(status)
             return @vehicle.location()
@@ -301,7 +302,6 @@ module.exports = (env) ->
           .catch (e) =>
             @setStatus(statusCodes.getStatusError)
             env.logger.debug "getStatus error: " + JSON.stringify(e.body,null,2)
-          clearTimeout(@statusTimer) if @statusTimer?
           @statusTimer = setTimeout(@getCarStatus, @currentPollTime)
           env.logger.debug "Next poll in " + @currentPollTime + " ms"
         else

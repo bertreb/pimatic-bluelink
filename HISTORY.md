@@ -68,3 +68,5 @@
 	* refresh now querying the car
 * 20210315, v0.2.26
 	* edit statusTimer
+* 20210315, v0.2.27
+	* edit statusTimer
