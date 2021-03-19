@@ -136,6 +136,10 @@ module.exports = (env) ->
         type: "boolean"
         acronym: "pluggedIn"
         labels: ["on","off"]
+      remainingChargeTime:
+        description: "Time left for charging"
+        type: "number"
+        acronym: "charging time"
       doorFrontLeft:
         description: "door fl"
         type: "boolean"
@@ -171,6 +175,11 @@ module.exports = (env) ->
         type: "number"
         unit: '%'
         acronym: "battery"
+      remainingRange:
+        description: "Remaining range basing on current battery resp. fuel level"
+        type: "number"
+        acronym: "remaining"
+        unit: "km"        
       twelveVoltBattery:
         description: "The 12 volt battery level"
         type: "number"
@@ -242,6 +251,7 @@ module.exports = (env) ->
       @_airco = laststate?.airco?.value ? "off"
       @_door = laststate?.door?.value ? false
       @_charging = laststate?.charging?.value ? false
+      @_remainingChargeTime = laststate?.remainingChargeTime?.value ? 0
       @_battery = laststate?.battery?.value ? 0
       @_twelveVoltBattery = laststate?.twelveVoltBattery?.value ? 0
       @_pluggedIn = laststate?.pluggedIn?.value ? false
@@ -262,6 +272,17 @@ module.exports = (env) ->
       maxRetries = 20
 
       @vehicle = null
+
+      ###
+      @config.xAttributeOptions = [] unless @config.xAttributeOptions?
+      for i, _attr of @attributes
+        do (_attr) =>
+          if _attr.type is 'number'
+            _hideSparklineNumber = 
+              name: i
+              displaySparkline: false
+            @config.xAttributeOptions.push _hideSparklineNumber
+      ###
 
       @plugin.on 'clientReady', @clientListener = () =>
         unless @statusTimer? 
@@ -515,6 +536,7 @@ module.exports = (env) ->
     getLat: -> Promise.resolve(@_lat)
     getLon: -> Promise.resolve(@_lon)
     getStatus: -> Promise.resolve(@_status)
+    getRemainingChargeTime: -> Promise.resolve(@_remainingChargeTime)
 
 
     setStatus: (status, command)=>
@@ -581,8 +603,12 @@ module.exports = (env) ->
       @emit 'door', Boolean _status
 
     setTwelveVoltBattery: (_status) =>
-      @_twelveVoltBattery = Math.round (_status / 2.55 )
-      @emit 'twelveVoltBattery', Math.round (_status / 2.55 )
+      @_twelveVoltBattery = Number _status # Math.round (_status / 2.55 )
+      @emit 'twelveVoltBattery', Number _status # Math.round (_status / 2.55 )
+
+    setRemainingChargeTime: (_status) =>
+      @_remainingChargeTime = Number _status
+      @emit 'remainingChargeTime', Number _status
 
     setDoors: (_status) =>
       if _status.doorOpen?
@@ -619,6 +645,9 @@ module.exports = (env) ->
         _remainingRange = Number evStatus.drvDistance[0].rangeByFuel.totalAvailableRange.value
         if _remainingRange > 0
           @setRemainingRange(_remainingRange)
+      if evStatus.remainTime2?.atc?.value?
+        @setRemainingChargeTime(evStatus.remainTime2.atc.value)
+
 
     setAirco: (_status) =>
       @_airco = _status

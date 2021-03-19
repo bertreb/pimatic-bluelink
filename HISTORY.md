@@ -70,3 +70,6 @@
 	* edit statusTimer
 * 20210315, v0.2.27
 	* edit statusTimer
+* 20210319, v0.2.28
+	* changed 12V handling
+	* added remainingChargingTime
