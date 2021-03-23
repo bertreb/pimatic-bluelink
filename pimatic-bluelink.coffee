@@ -136,9 +136,9 @@ module.exports = (env) ->
         type: "boolean"
         acronym: "pluggedIn"
         labels: ["on","off"]
-      remainingChargeTime:
+      chargingTime:
         description: "Time left for charging"
-        type: "number"
+        type: "string"
         acronym: "charging time"
       doorFrontLeft:
         description: "door fl"
@@ -195,16 +195,10 @@ module.exports = (env) ->
         type: "number"
         acronym: "speed"
         unit: "km/h"
-      remainingRange:
-        description: "Remaining range basing on current battery resp. fuel level"
-        type: "number"
-        acronym: "remaining"
-        unit: "km"        
-      maximumRange:
-        description: "Maximum range with fully charged battery resp. filled tank"
-        type: "number"
+      maximum:
+        description: "Maximum range basing on current battery resp. fuel level"
+        type: "string"
         acronym: "maximum"
-        unit: "km"        
       lat:
         description: "The cars latitude"
         type: "number"
@@ -251,12 +245,12 @@ module.exports = (env) ->
       @_airco = laststate?.airco?.value ? "off"
       @_door = laststate?.door?.value ? false
       @_charging = laststate?.charging?.value ? false
-      @_remainingChargeTime = laststate?.remainingChargeTime?.value ? 0
+      @_chargingTime = laststate?.chargingTime?.value ? 0
       @_battery = laststate?.battery?.value ? 0
       @_twelveVoltBattery = laststate?.twelveVoltBattery?.value ? 0
       @_pluggedIn = laststate?.pluggedIn?.value ? false
       @_odo = laststate?.odo?.value ? 0
-      @_maximumRange = laststate?.maximumRange?.value ? 0
+      @_maximum = laststate?.maximum?.value ? 0
       @_remainingRange = laststate?.remainingRange?.value ? 0
       @_doorFrontLeft = laststate?.doorFrontLeft?.value ? 0
       @_doorFrontRight = laststate?.doorFrontRight?.value ? 0
@@ -531,12 +525,12 @@ module.exports = (env) ->
     getPluggedIn: -> Promise.resolve(@_pluggedIn)
     getOdo: -> Promise.resolve(@_odo)
     getSpeed: -> Promise.resolve(@_speed)
-    getMaximumRange: -> Promise.resolve(@_maximumRange)
+    getMaximum: -> Promise.resolve(@_maximum)
     getRemainingRange: -> Promise.resolve(@_remainingRange)
     getLat: -> Promise.resolve(@_lat)
     getLon: -> Promise.resolve(@_lon)
     getStatus: -> Promise.resolve(@_status)
-    getRemainingChargeTime: -> Promise.resolve(@_remainingChargeTime)
+    getChargingTime: -> Promise.resolve(@_chargingTime)
 
 
     setStatus: (status, command)=>
@@ -582,9 +576,9 @@ module.exports = (env) ->
         env.logger.debug "Switching to passive poll, with polltime of " + @pollTimePassive + " ms"
         @statusTimer = setTimeout(@getCarStatus, @pollTimePassive)
 
-    setMaximumRange: (_range) =>
-      @_maximumRange = Number _range
-      @emit 'maximumRange', Number _range
+    setMaximum: (_range) =>
+      @_maximum = _range
+      @emit 'maximum', _range
 
     setRemainingRange: (_range) =>
       @_remainingRange = Number _range
@@ -606,9 +600,9 @@ module.exports = (env) ->
       @_twelveVoltBattery = Number _status # Math.round (_status / 2.55 )
       @emit 'twelveVoltBattery', Number _status # Math.round (_status / 2.55 )
 
-    setRemainingChargeTime: (_status) =>
-      @_remainingChargeTime = Number _status
-      @emit 'remainingChargeTime', Number _status
+    setChargingTime: (_status) =>
+      @_chargingTime = _status
+      @emit 'chargingTime', _status
 
     setDoors: (_status) =>
       if _status.doorOpen?
@@ -637,16 +631,36 @@ module.exports = (env) ->
       if @_charging
         @_pluggedIn = true
         @emit 'pluggedIn', (evStatus.batteryPlugin > 0)
+
+      # DC maximum
       if evStatus.reservChargeInfos.targetSOClist?[0]?.dte?.rangeByFuel?.totalAvailableRange?.value?
-        _maximumRange = Number evStatus.reservChargeInfos.targetSOClist[0].dte.rangeByFuel.totalAvailableRange.value
-        if _maximumRange > 0
-          @setMaximumRange(_maximumRange)
+        _maximumDC = Number evStatus.reservChargeInfos.targetSOClist[0].dte.rangeByFuel.totalAvailableRange.value
+        _maximumDCperc = Number evStatus.reservChargeInfos.targetSOClist[0].targetSOClevel
+      if evStatus.reservChargeInfos.targetSOClist?[1]?.dte?.rangeByFuel?.totalAvailableRange?.value?
+        _maximumAC = Number evStatus.reservChargeInfos.targetSOClist[1].dte.rangeByFuel.totalAvailableRange.value
+        _maximumACperc = Number evStatus.reservChargeInfos.targetSOClist[1].targetSOClevel
+      if _maximumDC? and _maximumAC?
+        _maximum = _maximumDC + "km (DC@" + _maximumDCperc + "%)/" + _maximumAC + "km (AC@" + _maximumACperc + "%)"
+        @setMaximum(_maximum)
+      else
+        @setMaximum("no value")
       if evStatus.drvDistance?[0]?.rangeByFuel?.totalAvailableRange?.value?
         _remainingRange = Number evStatus.drvDistance[0].rangeByFuel.totalAvailableRange.value
         if _remainingRange > 0
           @setRemainingRange(_remainingRange)
       if evStatus.remainTime2?.atc?.value?
-        @setRemainingChargeTime(evStatus.remainTime2.atc.value)
+        # dc = evStatus.remainTime2.etc1.value
+        # ac = evStatus.remainTime2.etc3.value
+        # acport = evStatus.remainTime2.etc2.value
+        if evStatus.remainTime2.etc1.value > 0
+          _chargingTime = evStatus.remainTime2.etc1.value + "min (DC)"
+        else if evStatus.remainTime2.etc3.value > 0
+          _chargingTime = evStatus.remainTime2.etc3.value + "min (AC)"
+        else if evStatus.remainTime2.etc2.value > 0
+          _chargingTime = evStatus.remainTime2.etc2.value + "min (ACport)"
+        else 
+          _chargingTime = "no value"
+        @setChargingTime(_chargingTime)
 
 
     setAirco: (_status) =>
