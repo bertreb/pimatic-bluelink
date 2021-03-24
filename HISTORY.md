@@ -75,3 +75,5 @@
 	* added remainingChargingTime
 * 20210323, v0.2.29
 	* changed maximum and chargingTime to DC and AC
+* 20210324, v0.2.30
+	* changed chargingTime and pluggedIn

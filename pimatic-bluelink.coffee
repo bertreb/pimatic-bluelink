@@ -133,9 +133,8 @@ module.exports = (env) ->
         hidden: true
       pluggedIn:
         description: "If vehicle is pluggedIn"
-        type: "boolean"
-        acronym: "pluggedIn"
-        labels: ["on","off"]
+        type: "string"
+        acronym: "batteryPlugin"
       chargingTime:
         description: "Time left for charging"
         type: "string"
@@ -248,7 +247,7 @@ module.exports = (env) ->
       @_chargingTime = laststate?.chargingTime?.value ? 0
       @_battery = laststate?.battery?.value ? 0
       @_twelveVoltBattery = laststate?.twelveVoltBattery?.value ? 0
-      @_pluggedIn = laststate?.pluggedIn?.value ? false
+      @_pluggedIn = laststate?.pluggedIn?.value ? "unplugged"
       @_odo = laststate?.odo?.value ? 0
       @_maximum = laststate?.maximum?.value ? 0
       @_remainingRange = laststate?.remainingRange?.value ? 0
@@ -624,13 +623,30 @@ module.exports = (env) ->
     setEvStatus: (evStatus) =>
       @_battery = Number evStatus.batteryStatus
       @emit 'battery', Number evStatus.batteryStatus
-      @_pluggedIn = evStatus.batteryPlugin > 0
-      @emit 'pluggedIn', (evStatus.batteryPlugin > 0)
+      switch evStatus.batteryPlugin
+        when 0
+          @_pluggedIn = "unplugged"
+          _chargingTime = "no value"
+        when 1
+          @_pluggedIn = "DC"
+          _chargingTime = evStatus.remainTime2.etc1.value + "min (DC)"
+        when 2
+          @_pluggedIn = "ACportable"
+          _chargingTime = evStatus.remainTime2.etc2.value + "min (ACp)"
+        when 3
+          @_pluggedIn = "AC"
+          _chargingTime = evStatus.remainTime2.etc3.value + "min (AC)"
+        else
+          @_pluggedIn = "unknown"
+          _chargingTime = ""
+      @setChargingTime(_chargingTime)
+
+      @emit 'pluggedIn', @_pluggedIn
       @_charging = Boolean evStatus.batteryCharge
       @emit 'charging', Boolean evStatus.batteryCharge
-      if @_charging
-        @_pluggedIn = true
-        @emit 'pluggedIn', (evStatus.batteryPlugin > 0)
+      #if @_charging
+      #  @_pluggedIn = true
+      #  @emit 'pluggedIn', (evStatus.batteryPlugin > 0)
 
       # DC maximum
       if evStatus.reservChargeInfos.targetSOClist?[0]?.dte?.rangeByFuel?.totalAvailableRange?.value?
@@ -640,7 +656,7 @@ module.exports = (env) ->
         _maximumAC = Number evStatus.reservChargeInfos.targetSOClist[1].dte.rangeByFuel.totalAvailableRange.value
         _maximumACperc = Number evStatus.reservChargeInfos.targetSOClist[1].targetSOClevel
       if _maximumDC? and _maximumAC?
-        _maximum = _maximumDC + "km (DC@" + _maximumDCperc + "%)/" + _maximumAC + "km (AC@" + _maximumACperc + "%)"
+        _maximum = _maximumDC + "km (DC@" + _maximumDCperc + "%) " + _maximumAC + "km (AC@" + _maximumACperc + "%)"
         @setMaximum(_maximum)
       else
         @setMaximum("no value")
@@ -648,19 +664,6 @@ module.exports = (env) ->
         _remainingRange = Number evStatus.drvDistance[0].rangeByFuel.totalAvailableRange.value
         if _remainingRange > 0
           @setRemainingRange(_remainingRange)
-      if evStatus.remainTime2?.atc?.value?
-        # dc = evStatus.remainTime2.etc1.value
-        # ac = evStatus.remainTime2.etc3.value
-        # acport = evStatus.remainTime2.etc2.value
-        if evStatus.remainTime2.etc1.value > 0
-          _chargingTime = evStatus.remainTime2.etc1.value + "min (DC)"
-        else if evStatus.remainTime2.etc3.value > 0
-          _chargingTime = evStatus.remainTime2.etc3.value + "min (AC)"
-        else if evStatus.remainTime2.etc2.value > 0
-          _chargingTime = evStatus.remainTime2.etc2.value + "min (ACport)"
-        else 
-          _chargingTime = "no value"
-        @setChargingTime(_chargingTime)
 
 
     setAirco: (_status) =>
@@ -680,9 +683,9 @@ module.exports = (env) ->
     setCharge: (charging) =>
       @_charging = Boolean charging
       @emit 'charging', Boolean charging
-      if charging
-        @_pluggedIn = true # if charging, must be pluggedIn
-        @emit 'pluggedIn', @_pluggedIn
+      #if charging
+      #  @_pluggedIn = true # if charging, must be pluggedIn
+      #  @emit 'pluggedIn', @_pluggedIn
 
     destroy:() =>
       clearTimeout(@statusTimer) if @statusTimer?
