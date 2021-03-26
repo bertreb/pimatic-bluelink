@@ -5,7 +5,8 @@ module.exports = (env) ->
   _ = require('lodash')
   fs = require('fs')
   path = require('path')
-  Bluelinky = require('kuvork')
+  #Bluelinky = require('kuvork')
+  Bluelinky = require('bluelinky')
 
   class BluelinkPlugin extends env.plugins.Plugin
     init: (app, @framework, @config) =>
@@ -28,11 +29,11 @@ module.exports = (env) ->
       if @brand is "hyundai"
         #Bluelinky = require('bluelinky')
         @_discoveryClass = "HyundaiDevice"
-        options["brand"] = "H"
+        options["brand"] = "hyundai"
       else
         #Bluelinky = require('kuvork')
         @_discoveryClass = "KiaDevice"
-        options["brand"] = "K"
+        options["brand"] = "kia"
         options["vin"] = "KNA" #for detecting the Kia or Hyandai api, brand deduction: VIN numbers of KIA are KNA/KNC/KNE
 
       @client = null
@@ -632,7 +633,7 @@ module.exports = (env) ->
           _chargingTime = evStatus.remainTime2.etc1.value + "min (DC)"
         when 2
           @_pluggedIn = "ACportable"
-          _chargingTime = evStatus.remainTime2.etc2.value + "min (ACp)"
+          _chargingTime = evStatus.remainTime2.etc2.value + "min (ACport)"
         when 3
           @_pluggedIn = "AC"
           _chargingTime = evStatus.remainTime2.etc3.value + "min (AC)"
