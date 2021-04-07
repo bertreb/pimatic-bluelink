@@ -79,3 +79,5 @@
 	* changed chargingTime and pluggedIn
 * 20210326, v0.2.31
 	* Replaced Kuvork by Bluelinky
+* 20210407, v0.2.32
+	* Changed ACport to AC

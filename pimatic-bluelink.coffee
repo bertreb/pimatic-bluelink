@@ -632,8 +632,10 @@ module.exports = (env) ->
           @_pluggedIn = "DC"
           _chargingTime = evStatus.remainTime2.etc1.value + "min (DC)"
         when 2
-          @_pluggedIn = "ACportable"
-          _chargingTime = evStatus.remainTime2.etc2.value + "min (ACport)"
+          #@_pluggedIn = "ACportable"
+          #_chargingTime = evStatus.remainTime2.etc2.value + "min (ACport)"
+          @_pluggedIn = "AC"
+          _chargingTime = evStatus.remainTime2.etc3.value + "min (AC)"
         when 3
           @_pluggedIn = "AC"
           _chargingTime = evStatus.remainTime2.etc3.value + "min (AC)"
