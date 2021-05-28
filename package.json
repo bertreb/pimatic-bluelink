@@ -26,14 +26,14 @@
     "cleaner",
     "ecovacs"
   ],
-  "version": "0.2.32",
+  "version": "0.2.33",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bertreb/pimatic-bluelink.git"
   },
   "configSchema": "pimatic-bluelink-config-schema.coffee",
   "dependencies": {
-    "bluelinky": "^7.0.0",
+    "bluelinky": "^7.2.2",
     "lodash": "^4.17.15"
   },
   "peerDependencies": {
