@@ -81,3 +81,5 @@
 	* Replaced Kuvork by Bluelinky
 * 20210407, v0.2.32
 	* Changed ACport to AC
+* 20210609, v0.2.34
+	* Update Bluelinky lib to 7.3.0
