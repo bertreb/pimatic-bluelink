@@ -83,3 +83,5 @@
 	* Changed ACport to AC
 * 20210609, v0.2.34
 	* Update Bluelinky lib to 7.3.0
+* 20220120, v0.2.35
+	* Update Bluelinky lib to 7.6.2
